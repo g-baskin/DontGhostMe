@@ -1,6 +1,6 @@
 # DontGhostMe
 
-![A haunted recruiting archive disappearing into a royal-purple corridor](./docs/assets/dontghostme-readme-hero-purple.png)
+![DontGhostMe in pulp-noir lettering over a haunted recruiting archive](./docs/assets/dontghostme-readme-hero-titled.png)
 
 **A candidate-owned recruiter relationship tracker that reconstructs job-search history from email.**
 
