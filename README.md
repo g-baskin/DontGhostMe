@@ -1,5 +1,7 @@
 # DontGhostMe
 
+![A haunted recruiting archive disappearing into a royal-purple corridor](./docs/assets/dontghostme-readme-hero-purple.png)
+
 **A candidate-owned recruiter relationship tracker that reconstructs job-search history from email.**
 
 Recruiters appear, disappear, follow up, submit candidates without clear status, and move between companies. DontGhostMe is intended to turn that scattered communication history into a private, correctable record of recruiters, opportunities, submissions, replies, follow-ups, and unresolved outcomes.
