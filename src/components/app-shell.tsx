@@ -10,6 +10,7 @@ const destinations = [
   ["/recruiters", "Recruiters"],
   ["/opportunities", "Opportunities"],
   ["/imports", "Imports"],
+  ["/supplemental-data", "Add Data"],
   ["/review-queue", "Review Queue"],
   ["/data-privacy", "Data & Privacy"],
 ] as const;

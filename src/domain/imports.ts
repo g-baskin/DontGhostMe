@@ -1,3 +1,5 @@
+export type ImportSourceKind = "gmail_mbox" | "linkedin_export";
+
 export type ImportStatus =
   | "uploading"
   | "preview_ready"
@@ -31,6 +33,17 @@ export const importErrorCodes = [
   "invalid_state",
   "cancelled",
   "internal_error",
+  "encrypted_archive",
+  "archive_entry_limit",
+  "archive_size_limit",
+  "archive_ratio_limit",
+  "archive_path_invalid",
+  "nested_archive",
+  "malformed_csv",
+  "schema_drift",
+  "row_limit",
+  "column_limit",
+  "field_limit",
 ] as const;
 
 export type ImportErrorCode = (typeof importErrorCodes)[number];
@@ -46,6 +59,7 @@ export interface ImportCounts {
 
 export interface HistoricalImportSummary extends ImportCounts {
   id: string;
+  sourceKind: ImportSourceKind;
   displayName: string;
   sourceSizeBytes: number;
   status: ImportStatus;
@@ -60,6 +74,7 @@ export interface ImportCheckpoint extends ImportCounts {
   sourceFingerprint: string;
   committedByteOffset: number;
   messageOrdinal: number;
+  logicalCursor: { datasetIndex: number; rowOrdinal: number } | null;
 }
 
 export class HistoricalImportError extends Error {

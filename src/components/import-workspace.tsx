@@ -13,7 +13,18 @@ const errorLabels: Record<string, string> = {
   invalid_mbox: "This file is not a supported MBOX.",
   database_busy: "The local database is busy. Try resuming shortly.",
   invalid_state: "This import changed state. Refresh its status and try again.",
-  internal_error: "The import could not continue. No message content was logged.",
+  internal_error: "The import could not continue. No source content was logged.",
+  encrypted_archive: "Encrypted ZIP files are not accepted.",
+  archive_entry_limit: "The ZIP contains too many entries.",
+  archive_size_limit: "The expanded ZIP exceeds the local safety limit.",
+  archive_ratio_limit: "The ZIP compression ratio exceeds the safety limit.",
+  archive_path_invalid: "The ZIP contains an unsafe or duplicate path.",
+  nested_archive: "Nested archives are not accepted.",
+  malformed_csv: "A recognized CSV is malformed.",
+  schema_drift: "A recognized CSV has unknown or ambiguous headers.",
+  row_limit: "The export contains too many rows.",
+  column_limit: "A CSV row contains too many columns.",
+  field_limit: "A CSV field exceeds the safety limit.",
 };
 
 type ApiResult = { import: HistoricalImportSummary };
@@ -30,11 +41,23 @@ async function requestImport(url: string, method = "POST") {
   return body.import;
 }
 
-function uploadFile(importId: string, file: File, onProgress: (percent: number) => void) {
+function uploadFile(
+  importId: string,
+  file: File,
+  sourceKind: "gmail_mbox" | "linkedin_export",
+  onProgress: (percent: number) => void,
+) {
   return new Promise<HistoricalImportSummary>((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("PUT", `/api/imports/${importId}/source`);
-    request.setRequestHeader("Content-Type", "application/mbox");
+    request.setRequestHeader(
+      "Content-Type",
+      sourceKind === "gmail_mbox"
+        ? "application/mbox"
+        : file.name.toLocaleLowerCase("en-US").endsWith(".zip")
+          ? "application/zip"
+          : "text/csv",
+    );
     request.setRequestHeader("X-File-Name", encodeURIComponent(file.name));
     request.setRequestHeader("X-File-Size", String(file.size));
     request.setRequestHeader("Accept", "application/json");
@@ -70,6 +93,7 @@ function processingPercent(item: HistoricalImportSummary) {
 
 export function ImportWorkspace({ initialImports }: { initialImports: HistoricalImportSummary[] }) {
   const [file, setFile] = useState<File | null>(null);
+  const [sourceKind, setSourceKind] = useState<"gmail_mbox" | "linkedin_export">("gmail_mbox");
   const [imports, setImports] = useState(initialImports);
   const [active, setActive] = useState<HistoricalImportSummary | null>(null);
   const [uploadPercent, setUploadPercent] = useState(0);
@@ -98,7 +122,7 @@ export function ImportWorkspace({ initialImports }: { initialImports: Historical
       const response = await fetch("/api/imports", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ name: file.name, size: file.size }),
+        body: JSON.stringify({ name: file.name, size: file.size, sourceKind }),
       });
       const created = (await response.json()) as ApiResult | { error?: { code?: string } };
       if (!response.ok || !("import" in created))
@@ -106,13 +130,17 @@ export function ImportWorkspace({ initialImports }: { initialImports: Historical
           "error" in created && created.error?.code ? created.error.code : "internal_error",
         );
       replaceImport(created.import);
-      const uploaded = await uploadFile(created.import.id, file, setUploadPercent);
+      const uploaded = await uploadFile(created.import.id, file, sourceKind, setUploadPercent);
       replaceImport(uploaded);
       setPending("preview");
-      setMessage("Reading message boundaries for preview. No domain records are being written.");
+      setMessage("Reading source boundaries for preview. No domain records are being written.");
       const previewed = await requestImport(`/api/imports/${uploaded.id}/preview`);
       replaceImport(previewed);
-      setMessage("Preview ready. Confirm before normalized messages are written.");
+      setMessage(
+        sourceKind === "gmail_mbox"
+          ? "Preview ready. Confirm before normalized messages are written."
+          : "Preview ready. Confirm before review proposals are written.",
+      );
     } catch (error) {
       showError(error);
     } finally {
@@ -122,7 +150,7 @@ export function ImportWorkspace({ initialImports }: { initialImports: Historical
 
   const process = async (item: HistoricalImportSummary) => {
     setPending("process");
-    setMessage("Importing bounded message batches.");
+    setMessage("Importing bounded local batches.");
     cancelRequested.current = false;
     try {
       let current = item;
@@ -176,26 +204,44 @@ export function ImportWorkspace({ initialImports }: { initialImports: Historical
     <>
       <section className="section reading-width" aria-labelledby="select-import">
         <h2 className="section-heading" id="select-import">
-          Select an extracted MBOX
+          Select a local source
         </h2>
         <p>
-          Google Takeout provides an archive. Extract it on your computer, then choose the file
-          ending in <code>.mbox</code>. Archives are rejected and never decompressed here.
+          Choose an extracted Gmail MBOX, or your official LinkedIn ZIP/recognized CSV. LinkedIn
+          connections and invitations are clues; job applications prove only an application record.
         </p>
         <div className="notice">
           Import reads a temporary local copy. It does not connect to, modify, label, archive, or
           send anything through Gmail.
         </div>
         <ul>
-          <li>Maximum MBOX: 2 GiB.</li>
+          <li>Maximum MBOX: 2 GiB. Maximum LinkedIn upload: 250 MiB.</li>
           <li>Maximum message: 25 MiB. Maximum attachment metadata item: 10 MiB decoded.</li>
           <li>Attachment content is never opened or separately stored.</li>
           <li>Temporary source bytes are deleted after completion or within 24 hours.</li>
         </ul>
         <div className="import-controls">
-          <label htmlFor="mbox-file">Local MBOX file</label>
+          <label htmlFor="source-kind">Source type</label>
+          <select
+            id="source-kind"
+            value={sourceKind}
+            onChange={(event) => {
+              setSourceKind(event.currentTarget.value as "gmail_mbox" | "linkedin_export");
+              setFile(null);
+            }}
+          >
+            <option value="gmail_mbox">Gmail Takeout MBOX</option>
+            <option value="linkedin_export">Official LinkedIn export</option>
+          </select>
+          <label htmlFor="mbox-file">
+            {sourceKind === "gmail_mbox" ? "Local MBOX file" : "Official LinkedIn ZIP or CSV"}
+          </label>
           <input
-            accept=".mbox,application/mbox"
+            accept={
+              sourceKind === "gmail_mbox"
+                ? ".mbox,application/mbox"
+                : ".zip,.csv,application/zip,text/csv"
+            }
             id="mbox-file"
             onChange={(event) => {
               setFile(event.currentTarget.files?.[0] ?? null);
@@ -224,8 +270,13 @@ export function ImportWorkspace({ initialImports }: { initialImports: Historical
         <section className="section record" aria-labelledby="import-preview">
           <h2 id="import-preview">Preview before import</h2>
           <p>
-            Found {active.discovered} messages. {active.skipped} exceed a limit and will be skipped.
-            No normalized messages have been written yet.
+            Found {active.discovered}{" "}
+            {active.sourceKind === "linkedin_export" ? "recognized rows" : "messages"}.{" "}
+            {active.skipped}{" "}
+            {active.sourceKind === "linkedin_export"
+              ? "files are unrecognized and ignored"
+              : "exceed a limit and will be skipped"}
+            . No normalized source records or review proposals have been written yet.
           </p>
           <div className="button-row">
             <button disabled={pending !== null} onClick={() => process(active)} type="button">
@@ -254,7 +305,8 @@ export function ImportWorkspace({ initialImports }: { initialImports: Historical
               <div>
                 <h3>{item.displayName}</h3>
                 <p className="source-note">
-                  Status: <strong>{item.status.replaceAll("_", " ")}</strong>. Created{" "}
+                  Source: {item.sourceKind === "linkedin_export" ? "LinkedIn export" : "Gmail MBOX"}
+                  . Status: <strong>{item.status.replaceAll("_", " ")}</strong>. Created{" "}
                   {new Intl.DateTimeFormat("en-US", {
                     dateStyle: "medium",
                     timeStyle: "short",

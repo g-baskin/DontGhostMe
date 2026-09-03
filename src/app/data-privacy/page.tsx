@@ -55,6 +55,10 @@ export default async function DataPrivacyPage({
             <dt>Exclusions</dt>
             <dd>{exclusions.length}</dd>
           </div>
+          <div>
+            <dt>Imported LinkedIn rows</dt>
+            <dd>{data.importSourceRecords.length}</dd>
+          </div>
         </dl>
       </section>
       <section className="section reading-width" aria-labelledby="exclusions">
@@ -111,7 +115,10 @@ export default async function DataPrivacyPage({
           <dt>
             <strong>Import deletion</strong>
           </dt>
-          <dd>Removes one historical import through its separate import controls.</dd>
+          <dd>
+            Removes one Gmail MBOX or LinkedIn export, its local source records, and review
+            proposals through the shared import controls.
+          </dd>
           <dt>
             <strong>Full export</strong>
           </dt>
@@ -142,8 +149,9 @@ export default async function DataPrivacyPage({
           Portable copy
         </h2>
         <p>
-          The JSON includes normalized records, evidence linkage, relationship statuses, exclusions,
-          and deletion audits.
+          The JSON includes normalized messages, official-export row provenance, LinkedIn
+          notification-email proposals with their source message links, manual history, evidence
+          linkage, decisions, exclusions, and deletion audits.
         </p>
         <p>
           <Link className="export-link" href="/api/export" download>

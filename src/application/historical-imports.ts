@@ -13,20 +13,53 @@ import {
   listHistoricalImports,
   markStagedSourceDeleted,
   type ParsedFrame,
+  persistLinkedInRows,
   persistParsedFrames,
   saveImportPreview,
   transitionImport,
 } from "@/db/historical-imports";
-import { HistoricalImportError, type ImportErrorCode } from "@/domain/imports";
+import {
+  HistoricalImportError,
+  type ImportErrorCode,
+  type ImportSourceKind,
+} from "@/domain/imports";
 import { IMPORT_LIMITS, type ImportLimits } from "@/ingestion/import-limits";
+import { inspectLinkedInExport, LINKEDIN_EXPORT_LIMITS } from "@/ingestion/linkedin-export";
 import { frameMbox } from "@/ingestion/mbox-framer";
 import { parseMimeBounded } from "@/ingestion/mime-parser";
 import {
   deleteStagedSource,
   getStagedSourcePath,
+  stageLinkedInExport,
   stageMbox,
+  validateLinkedInSelection,
   validateMboxSelection,
 } from "@/ingestion/staging";
+
+export interface ImportSourceAdapter {
+  sourceKind: ImportSourceKind;
+  validateSelection(name: string, size: number | null): string;
+  stage(
+    importId: string,
+    name: string,
+    size: number | null,
+    chunks: AsyncIterable<Uint8Array>,
+    stagingRoot?: string,
+  ): ReturnType<typeof stageMbox>;
+}
+
+export const importSourceAdapters: Record<ImportSourceKind, ImportSourceAdapter> = {
+  gmail_mbox: {
+    sourceKind: "gmail_mbox",
+    validateSelection: validateMboxSelection,
+    stage: stageMbox,
+  },
+  linkedin_export: {
+    sourceKind: "linkedin_export",
+    validateSelection: validateLinkedInSelection,
+    stage: stageLinkedInExport,
+  },
+};
 
 async function fingerprint(path: string) {
   const hash = createHash("sha256");
@@ -57,9 +90,13 @@ export function beginHistoricalImport(
   ownerId: string,
   originalName: string,
   declaredSize: number | null,
+  sourceKind: ImportSourceKind = "gmail_mbox",
 ) {
-  const displayName = validateMboxSelection(originalName, declaredSize);
-  return createHistoricalImport(database, ownerId, displayName);
+  const displayName = importSourceAdapters[sourceKind].validateSelection(
+    originalName,
+    declaredSize,
+  );
+  return createHistoricalImport(database, ownerId, displayName, sourceKind);
 }
 
 export async function uploadHistoricalImport(
@@ -71,8 +108,14 @@ export async function uploadHistoricalImport(
   chunks: AsyncIterable<Uint8Array>,
   stagingRoot?: string,
 ) {
-  getHistoricalImport(database, ownerId, importId);
-  const staged = await stageMbox(importId, originalName, declaredSize, chunks, stagingRoot);
+  const summary = getHistoricalImport(database, ownerId, importId);
+  const staged = await importSourceAdapters[summary.sourceKind].stage(
+    importId,
+    originalName,
+    declaredSize,
+    chunks,
+    stagingRoot,
+  );
   const attached = attachStagedSource(
     database,
     ownerId,
@@ -110,9 +153,15 @@ export async function previewHistoricalImport(
   );
   let discovered = 0;
   let skipped = 0;
-  for await (const message of frameMbox(path, 0, limits.messageBytes)) {
-    discovered += 1;
-    if (message.oversized) skipped += 1;
+  if (summary.sourceKind === "linkedin_export") {
+    const { inventory } = await inspectLinkedInExport(path, summary.displayName);
+    discovered = inventory.reduce((count, item) => count + item.rowCount, 0);
+    skipped = inventory.filter((item) => !item.recognized).length;
+  } else {
+    for await (const message of frameMbox(path, 0, limits.messageBytes)) {
+      discovered += 1;
+      if (message.oversized) skipped += 1;
+    }
   }
   saveImportPreview(database, ownerId, importId, discovered, skipped);
   return getHistoricalImport(database, ownerId, importId);
@@ -167,6 +216,42 @@ async function runHistoricalImportBatch(
         stagingRoot,
       )
     : getStagedSourcePath(importId, stagingRoot);
+  if (summary.sourceKind === "linkedin_export") {
+    // simplification: each bounded batch rescans at most 1,000,000 local rows; replace with indexed entry offsets if profiling shows this ceiling is reached.
+    const { rows } = await inspectLinkedInExport(path, summary.displayName, true);
+    const batch = rows.slice(
+      checkpoint.messageOrdinal,
+      checkpoint.messageOrdinal + LINKEDIN_EXPORT_LIMITS.batchRows,
+    );
+    if (batch.length) {
+      const last = batch.at(-1);
+      persistLinkedInRows(database, ownerId, importId, batch, {
+        datasetIndex: Math.max(
+          0,
+          ["connections", "invitations", "job_applications"].indexOf(
+            last?.datasetKind ?? "connections",
+          ),
+        ),
+        rowOrdinal: checkpoint.messageOrdinal + batch.length,
+      });
+    }
+    if (checkpoint.messageOrdinal + batch.length >= rows.length) {
+      await deleteStagedSource(importId, stagingRoot);
+      completeImport(database, ownerId, importId);
+      database.sqlite
+        .prepare(
+          "update classification_runs set status = 'completed', completed_at = ?, updated_at = ? where id = ? and owner_id = ?",
+        )
+        .run(
+          new Date().toISOString(),
+          new Date().toISOString(),
+          `linkedin-export:${importId}`,
+          ownerId,
+        );
+    }
+    return getHistoricalImport(database, ownerId, importId);
+  }
+
   const fileSize = (await stat(path)).size;
   if (checkpoint.committedByteOffset >= fileSize) {
     await deleteStagedSource(importId, stagingRoot);

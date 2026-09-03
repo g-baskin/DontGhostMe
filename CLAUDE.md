@@ -107,6 +107,6 @@ The implementation includes checked-in forward-only migrations; verified SQLite 
 
 Keep SQLite through the local single-user milestones. PostgreSQL remains deferred until hosted multi-user operation requires tenant isolation, multiple application instances, independently writing workers, or writers on different hosts.
 
-M1 safe historical import and M2 deterministic local discovery are implemented. M2 requires confirmed owner addresses, stores versioned explainable proposals, and promotes only reviewed facts while preserving provenance and decisions. M3 relationship views and analytics are the next planning milestone. Do not add live Gmail, LinkedIn, AI, analytics, enrichment, email verification, telemetry, or outbound messaging without explicit approval.
+M1 safe historical import, M2 deterministic local discovery, M3 relationship views and analytics, and M5 authorized supplemental inputs are implemented. M5 added manual assertions with immutable history and retraction fallback, official LinkedIn export ingestion behind the M1 import lifecycle (review-required proposals, proof boundaries preserved), and LinkedIn notification-email interpretation over already-imported messages (deterministic sender plus structure evidence only). Do not add live Gmail, LinkedIn scraping, AI, analytics, enrichment, email verification, telemetry, or outbound messaging without explicit approval.
 
 <!-- gg:init:end -->

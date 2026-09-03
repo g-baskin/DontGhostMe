@@ -91,6 +91,24 @@ export function decideClassificationProposal(
         .run(timestamp, proposalId, ownerId);
       return { revision: nextRevision, promotedEntityId: null };
     }
+    if (
+      proposal.proposal_type === "linkedin_export_row" ||
+      proposal.proposal_type === "linkedin_notification"
+    ) {
+      // Review-only evidence types: decisions never silently create or mutate
+      // recruiters, opportunities, submissions, or relationship statuses.
+      database.sqlite
+        .prepare(
+          "update classification_proposals set state = ?, updated_at = ? where id = ? and owner_id = ?",
+        )
+        .run(
+          input.decision === "corrected" ? "corrected" : "accepted",
+          timestamp,
+          proposalId,
+          ownerId,
+        );
+      return { revision: nextRevision, promotedEntityId: null };
+    }
     const value = JSON.parse(correctedJson ?? proposal.proposed_value_json) as ProposedValue;
     const promoted = promote(database, ownerId, proposal, value, timestamp, input.decision);
     database.sqlite
@@ -163,6 +181,9 @@ function promote(
     case "submission":
       promoted = promoteSubmission(database, ownerId, value, timestamp);
       break;
+    case "linkedin_export_row":
+    case "linkedin_notification":
+      throw new ClassificationInputError("invalid_run_state");
   }
   const assertionId = randomUUID();
   const excerpt = database.sqlite

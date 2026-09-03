@@ -123,11 +123,23 @@ Exit criteria:
 
 ## M5 — Authorized supplemental inputs
 
-Potential features, each requiring separate approval:
+Implemented (local-only, three slices):
 
-- User-uploaded official LinkedIn data export.
-- Manual recruiter and company corrections.
-- LinkedIn notification-email interpretation.
+- Manual recruiter, organization, and opportunity creation and correction with immutable
+  `manual_assertions` history, supersession, retraction fallback, and manual-over-machine
+  precedence (migration 0004, portable export format v2).
+- User-uploaded official LinkedIn export (ZIP or recognized CSV) ingestion through the M1
+  historical-import lifecycle behind a source-adapter dispatch (migration 0005: `source_kind`,
+  logical cursor, `import_source_records`, `linkedin_export_row` review-required proposals;
+  export format v3). Connections and invitations are relationship clues; job applications prove
+  only an application record. Nothing is auto-created without review.
+- LinkedIn notification-email interpretation over already-imported normalized messages
+  (migration 0006): deterministic sender plus explicit structure evidence yields review-required
+  `linkedin_notification` proposals; sender-only matches yield nothing. No promotion to canonical
+  facts without explicit review.
+
+Deferred, each requiring separate approval:
+
 - User-initiated, selective email deliverability checks.
 
 Prohibited direction:

@@ -263,6 +263,8 @@ export function ClassificationWorkspace({
               <option value="submission">Submissions</option>
               <option value="identity_link">Identity links</option>
               <option value="message_direction">Direction</option>
+              <option value="linkedin_export_row">LinkedIn export rows</option>
+              <option value="linkedin_notification">Notification emails</option>
             </select>
           </label>
           <label>

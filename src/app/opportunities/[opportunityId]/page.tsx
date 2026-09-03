@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOpportunityDetail } from "@/application/get-opportunity-detail";
-import { repository, syntheticOwnerId } from "@/application/server";
+import { database, repository, syntheticOwnerId } from "@/application/server";
+import { ManualCorrectionForm } from "@/components/manual-correction-form";
+import { latestManualAssertion } from "@/db/manual-assertions";
 
 export const runtime = "nodejs";
 export const metadata: Metadata = { title: "Opportunity evidence" };
@@ -21,6 +23,13 @@ export default async function OpportunityDetailPage({
   const { opportunityId } = await params;
   const opportunity = getOpportunityDetail(repository, syntheticOwnerId, opportunityId);
   if (!opportunity) notFound();
+  const manualTitle = latestManualAssertion(
+    database,
+    syntheticOwnerId,
+    "opportunity",
+    opportunity.id,
+    "title",
+  );
   return (
     <>
       <header className="page-heading">
@@ -31,6 +40,21 @@ export default async function OpportunityDetailPage({
         </p>
         <Link href="/opportunities">Return to opportunity pipeline</Link>
       </header>
+      <section className="section" aria-labelledby="manual-data">
+        <h2 className="section-heading" id="manual-data">
+          Manual data
+        </h2>
+        <ManualCorrectionForm
+          entityId={opportunity.id}
+          entityKind="opportunity"
+          fieldName="title"
+          label="Opportunity title"
+          currentValue={opportunity.title}
+          fallbackValue={opportunity.fallbackValues.title as string | null}
+          revision={manualTitle?.revision ?? 0}
+          assertionId={manualTitle?.id}
+        />
+      </section>
       <section className="section" aria-labelledby="stage-history">
         <h2 className="section-heading" id="stage-history">
           Evidence-backed stage history

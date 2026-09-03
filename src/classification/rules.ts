@@ -30,6 +30,11 @@ export const SIGNAL_WEIGHTS: Readonly<Record<ClassificationSignalCode, number>> 
   subject_participant_match: 2000,
   organization_signature: 1800,
   explicit_identity_continuity: 5000,
+  linkedin_deterministic_sender: 3000,
+  linkedin_invitation_structure: 2500,
+  linkedin_message_structure: 2500,
+  linkedin_application_structure: 2500,
+  linkedin_job_structure: 2000,
 });
 
 const canonicalRules = Object.entries(SIGNAL_WEIGHTS)
@@ -65,4 +70,12 @@ export const SIGNAL_EXPLANATIONS: Readonly<Record<ClassificationSignalCode, stri
     organization_signature: "A signature appears to name the sender's organization.",
     explicit_identity_continuity:
       "The sender explicitly identifies a previous address or employer.",
+    linkedin_deterministic_sender: "The sender is a deterministic LinkedIn notification address.",
+    linkedin_invitation_structure:
+      "The message has LinkedIn invitation structure beyond the sender.",
+    linkedin_message_structure:
+      "The message has LinkedIn direct-message structure beyond the sender.",
+    linkedin_application_structure:
+      "The message has LinkedIn application-update structure beyond the sender.",
+    linkedin_job_structure: "The message has LinkedIn job-alert structure beyond the sender.",
   });

@@ -6,6 +6,8 @@ export const CLASSIFICATION_PROPOSAL_TYPES = [
   "opportunity",
   "conversation_group",
   "submission",
+  "linkedin_export_row",
+  "linkedin_notification",
 ] as const;
 export type ClassificationProposalType = (typeof CLASSIFICATION_PROPOSAL_TYPES)[number];
 
@@ -84,7 +86,13 @@ export type ProposedValue =
   | { normalizedEmail: string; organization: string }
   | { client: string | null; recruiterEmail: string; title: string }
   | { messageIds: string[]; subject: string; threadKey: string }
-  | { client: string; messageId: string; recruiterEmail: string; submittedAt: string };
+  | { client: string; messageId: string; recruiterEmail: string; submittedAt: string }
+  | {
+      eventKind: "invitation" | "recruiter_message" | "application_update" | "job_update";
+      messageId: string;
+      occurredAt: string | null;
+      confidenceReasons: string[];
+    };
 
 export interface ClassificationEvidenceDraft {
   normalizedMessageId: string;
@@ -147,4 +155,9 @@ export type ClassificationSignalCode =
   | "thread_reference"
   | "subject_participant_match"
   | "organization_signature"
-  | "explicit_identity_continuity";
+  | "explicit_identity_continuity"
+  | "linkedin_deterministic_sender"
+  | "linkedin_invitation_structure"
+  | "linkedin_message_structure"
+  | "linkedin_application_structure"
+  | "linkedin_job_structure";

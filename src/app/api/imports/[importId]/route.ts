@@ -2,6 +2,7 @@ import { importErrorResponse, privateJson } from "@/app/api/imports/http";
 import { deleteHistoricalImport, getHistoricalImport } from "@/application/historical-imports";
 import { assertLocalMutationRequest } from "@/application/local-request";
 import { database, syntheticOwnerId } from "@/application/server";
+import { getImportDeletionImpact } from "@/db/historical-imports";
 
 export const runtime = "nodejs";
 
@@ -10,7 +11,10 @@ type Context = { params: Promise<{ importId: string }> };
 export async function GET(_request: Request, context: Context) {
   try {
     const { importId } = await context.params;
-    return privateJson({ import: getHistoricalImport(database, syntheticOwnerId, importId) });
+    return privateJson({
+      import: getHistoricalImport(database, syntheticOwnerId, importId),
+      deletionImpact: getImportDeletionImpact(database, syntheticOwnerId, importId),
+    });
   } catch (error) {
     return importErrorResponse(error);
   }

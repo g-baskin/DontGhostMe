@@ -2,6 +2,7 @@ import { importErrorResponse, privateJson } from "@/app/api/imports/http";
 import { failHistoricalImport, uploadHistoricalImport } from "@/application/historical-imports";
 import { assertLocalMutationRequest } from "@/application/local-request";
 import { database, syntheticOwnerId } from "@/application/server";
+import { getHistoricalImport } from "@/db/historical-imports";
 import { HistoricalImportError } from "@/domain/imports";
 
 export const runtime = "nodejs";
@@ -21,7 +22,12 @@ export async function PUT(request: Request, context: Context) {
   const { importId } = await context.params;
   try {
     assertLocalMutationRequest(request);
-    if (request.headers.get("content-type") !== "application/mbox")
+    const existingImport = getHistoricalImport(database, syntheticOwnerId, importId);
+    const allowedContentTypes =
+      existingImport.sourceKind === "linkedin_export"
+        ? ["application/zip", "text/csv", "application/csv", "application/octet-stream"]
+        : ["application/mbox"];
+    if (!allowedContentTypes.includes(request.headers.get("content-type") ?? ""))
       throw new HistoricalImportError("invalid_request", false);
     const encodedName = request.headers.get("x-file-name");
     const sizeHeader = request.headers.get("x-file-size");

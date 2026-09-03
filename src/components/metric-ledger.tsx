@@ -2,6 +2,8 @@ import type { RecruiterMetrics } from "@/domain/models";
 
 const date = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" });
 
+const displayDate = (value: string) => (value === "Unknown" ? value : date.format(new Date(value)));
+
 const duration = (milliseconds: number | null): string =>
   milliseconds === null
     ? "Unavailable: fewer than three pairs"
@@ -9,8 +11,8 @@ const duration = (milliseconds: number | null): string =>
 
 export function MetricLedger({ metrics }: { metrics: RecruiterMetrics }) {
   const items = [
-    ["First contact", date.format(new Date(metrics.firstContact))],
-    ["Last contact", date.format(new Date(metrics.lastContact))],
+    ["First contact", displayDate(metrics.firstContact)],
+    ["Last contact", displayDate(metrics.lastContact)],
     ["Recruiter messages", String(metrics.recruiterMessages)],
     ["Candidate replies", String(metrics.candidateReplies)],
     ["Inferred follow-ups", String(metrics.inferredFollowUps)],

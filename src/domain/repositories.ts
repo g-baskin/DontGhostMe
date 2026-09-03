@@ -23,6 +23,8 @@ export interface RecruiterSummary extends Recruiter {
   relationshipStatus: RelationshipStatus;
   excluded: boolean;
   possibleCompanyChange: boolean;
+  provenance: Record<string, "manual" | "machine">;
+  fallbackValues: Record<string, unknown>;
 }
 
 export interface OpportunitySummary extends Opportunity {
@@ -32,6 +34,8 @@ export interface OpportunitySummary extends Opportunity {
   outcome: OpportunityOutcome;
   stage: OpportunityStage;
   excluded: boolean;
+  provenance: Record<string, "manual" | "machine">;
+  fallbackValues: Record<string, unknown>;
 }
 
 export interface RecruiterFilters {
@@ -66,7 +70,7 @@ export interface RecruiterDetail extends RecruiterSummary {
 
 export interface PortableExport {
   exportedAt: string;
-  formatVersion: 1;
+  formatVersion: 3;
   owner: { id: Id; displayName: string };
   recruiters: unknown[];
   recruiterIdentities: unknown[];
@@ -95,6 +99,8 @@ export interface PortableExport {
   relationshipStatuses: unknown[];
   identityExclusions: unknown[];
   recruiterDeletions: unknown[];
+  manualAssertions: unknown[];
+  importSourceRecords: unknown[];
 }
 
 export interface ReadRepository {

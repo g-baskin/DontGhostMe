@@ -6,13 +6,16 @@ import {
   type HistoricalImportSummary,
   type ImportCounts,
   type ImportErrorCode,
+  type ImportSourceKind,
   type ImportStatus,
 } from "@/domain/imports";
+import type { LinkedInSourceRow } from "@/ingestion/linkedin-export";
 import type { FramedMboxMessage } from "@/ingestion/mbox-framer";
 import type { ParsedNormalizedMessage } from "@/ingestion/mime-parser";
 
 interface ImportRow {
   id: string;
+  source_kind: ImportSourceKind;
   original_name_display: string;
   source_size_bytes: number;
   status: ImportStatus;
@@ -31,6 +34,7 @@ interface ImportRow {
 
 interface CheckpointRow {
   source_fingerprint: string;
+  logical_cursor_json: string | null;
   committed_byte_offset: number;
   message_ordinal: number;
   discovered_count: number;
@@ -50,6 +54,7 @@ export interface ParsedFrame {
 function mapImport(row: ImportRow): HistoricalImportSummary {
   return {
     id: row.id,
+    sourceKind: row.source_kind,
     displayName: row.original_name_display,
     sourceSizeBytes: row.source_size_bytes,
     status: row.status,
@@ -71,6 +76,7 @@ export function createHistoricalImport(
   database: AppDatabase,
   ownerId: string,
   displayName: string,
+  sourceKind: ImportSourceKind = "gmail_mbox",
   now = new Date(),
 ) {
   const id = randomUUID();
@@ -79,10 +85,10 @@ export function createHistoricalImport(
     database.sqlite
       .prepare(
         `insert into historical_imports (
-          id, owner_id, original_name_display, status, created_at, updated_at
-        ) values (?, ?, ?, 'uploading', ?, ?)`,
+          id, owner_id, source_kind, original_name_display, status, created_at, updated_at
+        ) values (?, ?, ?, ?, 'uploading', ?, ?)`,
       )
-      .run(id, ownerId, displayName, timestamp, timestamp);
+      .run(id, ownerId, sourceKind, displayName, timestamp, timestamp);
   });
   return id;
 }
@@ -177,7 +183,7 @@ export function saveImportPreview(
 export function getHistoricalImport(database: AppDatabase, ownerId: string, importId: string) {
   const row = database.sqlite
     .prepare(
-      `select id, original_name_display, source_size_bytes, status, discovered_count,
+      `select id, source_kind, original_name_display, source_size_bytes, status, discovered_count,
         parsed_count, skipped_count, duplicate_count, failed_count, imported_count,
         last_error_code, created_at, updated_at, completed_at, staged_source_deleted
        from historical_imports where id = ? and owner_id = ?`,
@@ -191,7 +197,7 @@ export function listHistoricalImports(database: AppDatabase, ownerId: string) {
   return (
     database.sqlite
       .prepare(
-        `select id, original_name_display, source_size_bytes, status, discovered_count,
+        `select id, source_kind, original_name_display, source_size_bytes, status, discovered_count,
           parsed_count, skipped_count, duplicate_count, failed_count, imported_count,
           last_error_code, created_at, updated_at, completed_at, staged_source_deleted
          from historical_imports where owner_id = ? order by created_at desc`,
@@ -203,7 +209,7 @@ export function listHistoricalImports(database: AppDatabase, ownerId: string) {
 export function getImportCheckpoint(database: AppDatabase, ownerId: string, importId: string) {
   const row = database.sqlite
     .prepare(
-      `select source_fingerprint, committed_byte_offset, message_ordinal,
+      `select source_fingerprint, logical_cursor_json, committed_byte_offset, message_ordinal,
         discovered_count, parsed_count, skipped_count, duplicate_count, failed_count, imported_count
        from import_checkpoints where historical_import_id = ? and owner_id = ?`,
     )
@@ -213,6 +219,9 @@ export function getImportCheckpoint(database: AppDatabase, ownerId: string, impo
     sourceFingerprint: row.source_fingerprint,
     committedByteOffset: row.committed_byte_offset,
     messageOrdinal: row.message_ordinal,
+    logicalCursor: row.logical_cursor_json
+      ? (JSON.parse(row.logical_cursor_json) as { datasetIndex: number; rowOrdinal: number })
+      : null,
     discovered: row.discovered_count,
     parsed: row.parsed_count,
     skipped: row.skipped_count,
@@ -464,6 +473,104 @@ export function persistParsedFrames(
   });
 }
 
+export function persistLinkedInRows(
+  database: AppDatabase,
+  ownerId: string,
+  importId: string,
+  rows: LinkedInSourceRow[],
+  logicalCursor: { datasetIndex: number; rowOrdinal: number },
+  now = new Date(),
+) {
+  return withImmediateTransaction(database, () => {
+    const summary = getHistoricalImport(database, ownerId, importId);
+    if (summary.sourceKind !== "linkedin_export" || summary.status !== "processing")
+      throw new HistoricalImportError("invalid_state", false);
+    const timestamp = now.toISOString();
+    const runId = `linkedin-export:${importId}`;
+    const fingerprint = getImportCheckpoint(database, ownerId, importId).sourceFingerprint;
+    database.sqlite
+      .prepare(`insert into classification_runs
+        (id, owner_id, engine_version, ruleset_sha256, source_set_sha256, status,
+         processed_count, proposal_count, started_at, updated_at)
+        values (?, ?, 'linkedin-export-v1', ?, ?, 'running', 0, 0, ?, ?)
+        on conflict(id) do nothing`)
+      .run(runId, ownerId, "linkedin-export-v1", fingerprint, timestamp, timestamp);
+    let inserted = 0;
+    for (const row of rows) {
+      const normalizedJson = JSON.stringify(row.normalized);
+      const recordId = randomUUID();
+      const result = database.sqlite
+        .prepare(`insert into import_source_records
+          (id, owner_id, historical_import_id, dataset_kind, row_ordinal, row_sha256,
+           normalized_json, parse_status, created_at)
+          values (?, ?, ?, ?, ?, ?, ?, 'parsed', ?)
+          on conflict(historical_import_id, dataset_kind, row_ordinal) do nothing`)
+        .run(
+          recordId,
+          ownerId,
+          importId,
+          row.datasetKind,
+          row.rowOrdinal,
+          row.rowSha256,
+          normalizedJson,
+          timestamp,
+        );
+      if (result.changes === 0) continue;
+      inserted += 1;
+      const proposed = JSON.stringify({
+        importSourceRecordId: recordId,
+        datasetKind: row.datasetKind,
+        rowOrdinal: row.rowOrdinal,
+        values: row.normalized,
+        proofBoundary:
+          row.datasetKind === "job_applications"
+            ? "application_record_only"
+            : "relationship_clue_only",
+      });
+      database.sqlite
+        .prepare(`insert into classification_proposals
+          (id, owner_id, run_id, proposal_key, proposal_type, proposed_value_json,
+           confidence_basis_points, review_requirement, state, created_at, updated_at)
+          values (?, ?, ?, ?, 'linkedin_export_row', ?, 5000, 'user_review', 'proposed', ?, ?)
+          on conflict(run_id, proposal_key) do nothing`)
+        .run(
+          randomUUID(),
+          ownerId,
+          runId,
+          `${row.datasetKind}:${row.rowSha256}`,
+          proposed,
+          timestamp,
+          timestamp,
+        );
+    }
+    const checkpoint = getImportCheckpoint(database, ownerId, importId);
+    const imported = checkpoint.imported + inserted;
+    database.sqlite
+      .prepare(`update import_checkpoints set logical_cursor_json = ?, message_ordinal = ?,
+        parsed_count = ?, imported_count = ?, updated_at = ?
+        where historical_import_id = ? and owner_id = ?`)
+      .run(
+        JSON.stringify(logicalCursor),
+        logicalCursor.rowOrdinal,
+        imported,
+        imported,
+        timestamp,
+        importId,
+        ownerId,
+      );
+    database.sqlite
+      .prepare(`update historical_imports set parsed_count = ?, imported_count = ?,
+        started_at = coalesce(started_at, ?), updated_at = ? where id = ? and owner_id = ?`)
+      .run(imported, imported, timestamp, timestamp, importId, ownerId);
+    database.sqlite
+      .prepare(
+        `update classification_runs set processed_count = ?, proposal_count = ?, updated_at = ? where id = ? and owner_id = ?`,
+      )
+      .run(imported, imported, timestamp, runId, ownerId);
+    return inserted;
+  });
+}
+
 export function transitionImport(
   database: AppDatabase,
   ownerId: string,
@@ -533,8 +640,47 @@ export function listExpiredImports(database: AppDatabase, ownerId: string, now =
     .all(ownerId, now.toISOString()) as Array<{ id: string }>;
 }
 
+export function getImportDeletionImpact(database: AppDatabase, ownerId: string, importId: string) {
+  getHistoricalImport(database, ownerId, importId);
+  const count = (table: string) =>
+    Number(
+      (
+        database.sqlite
+          .prepare(
+            `select count(*) as count from ${table} where owner_id = ? and historical_import_id = ?`,
+          )
+          .get(ownerId, importId) as { count: number }
+      ).count,
+    );
+  return {
+    sourceMessages: count("import_source_messages"),
+    sourceRecords: count("import_source_records"),
+    normalizedMessages: Number(
+      (
+        database.sqlite
+          .prepare(`select count(*) as count from normalized_messages nm
+            join import_source_messages ism on ism.id = nm.source_message_id
+            where ism.owner_id = ? and ism.historical_import_id = ?`)
+          .get(ownerId, importId) as { count: number }
+      ).count,
+    ),
+    proposals: Number(
+      (
+        database.sqlite
+          .prepare(
+            "select count(*) as count from classification_proposals where owner_id = ? and run_id = ?",
+          )
+          .get(ownerId, `linkedin-export:${importId}`) as { count: number }
+      ).count,
+    ),
+  };
+}
+
 export function deleteImportMetadata(database: AppDatabase, ownerId: string, importId: string) {
   withImmediateTransaction(database, () => {
+    database.sqlite
+      .prepare("delete from classification_runs where id = ? and owner_id = ?")
+      .run(`linkedin-export:${importId}`, ownerId);
     const result = database.sqlite
       .prepare("delete from historical_imports where id = ? and owner_id = ?")
       .run(importId, ownerId);

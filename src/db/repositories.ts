@@ -22,6 +22,7 @@ import type {
 } from "@/domain/repositories";
 import { deriveReviewState, ReviewConflictError } from "@/domain/reviews";
 import type { AppDatabase } from "./client";
+import { latestManualAssertion } from "./manual-assertions";
 
 interface RecruiterRow {
   id: string;
@@ -118,6 +119,8 @@ const exportTableNames = [
   "recruiter_relationship_statuses",
   "identity_exclusions",
   "recruiter_deletions",
+  "manual_assertions",
+  "import_source_records",
 ] as const;
 
 type ExportTableName = (typeof exportTableNames)[number];
@@ -159,6 +162,13 @@ function buildSummary(
   ownerId: string,
   recruiter: RecruiterRow,
 ): RecruiterSummary {
+  const manualName = latestManualAssertion(
+    database,
+    ownerId,
+    "recruiter",
+    recruiter.id,
+    "canonical_name",
+  );
   const identities = all<{
     id: string;
     normalized_email: string;
@@ -170,14 +180,37 @@ function buildSummary(
      where owner_id = ? and recruiter_id = ? order by valid_from`,
     ownerId,
     recruiter.id,
-  ).map((identity) => ({
-    id: identity.id,
-    ownerId,
-    recruiterId: recruiter.id,
-    email: identity.normalized_email,
-    validFrom: identity.valid_from,
-    validTo: identity.valid_to,
-  }));
+  ).map((identity) => {
+    const manualEmail = latestManualAssertion(
+      database,
+      ownerId,
+      "recruiter_identity",
+      identity.id,
+      "email",
+    );
+    const manualValidFrom = latestManualAssertion(
+      database,
+      ownerId,
+      "recruiter_identity",
+      identity.id,
+      "valid_from",
+    );
+    const manualValidTo = latestManualAssertion(
+      database,
+      ownerId,
+      "recruiter_identity",
+      identity.id,
+      "valid_to",
+    );
+    return {
+      id: identity.id,
+      ownerId,
+      recruiterId: recruiter.id,
+      email: String(manualEmail?.value ?? identity.normalized_email),
+      validFrom: String(manualValidFrom?.value ?? identity.valid_from),
+      validTo: manualValidTo ? (manualValidTo.value as string | null) : identity.valid_to,
+    };
+  });
   const affiliations = acceptedAffiliations(database, ownerId, recruiter.id);
   const lastContact = one<{ occurred_at: string }>(
     database,
@@ -221,7 +254,7 @@ function buildSummary(
   return {
     id: recruiter.id,
     ownerId,
-    canonicalName: recruiter.canonical_name,
+    canonicalName: String(manualName?.value ?? recruiter.canonical_name),
     identities,
     firstAffiliation: affiliations[0]?.name ?? "Unknown",
     currentAffiliation: affiliations.at(-1)?.name ?? "Unconfirmed",
@@ -230,21 +263,31 @@ function buildSummary(
     relationshipStatus: relationship?.status ?? null,
     excluded: Boolean(relationship?.excluded_at) || excludedIdentity,
     possibleCompanyChange: affiliations.length > 1,
+    provenance: { canonicalName: manualName ? "manual" : "machine" },
+    fallbackValues: { canonicalName: manualName ? recruiter.canonical_name : null },
   };
 }
 
-function toOpportunity(row: Record<string, unknown>): Opportunity {
+function toOpportunity(database: AppDatabase, row: Record<string, unknown>): Opportunity {
+  const ownerId = String(row.owner_id);
+  const entityId = String(row.id);
+  const manual = (field: string) =>
+    latestManualAssertion(database, ownerId, "opportunity", entityId, field)?.value;
   return {
-    id: String(row.id),
-    ownerId: String(row.owner_id),
+    id: entityId,
+    ownerId,
     recruiterId: String(row.recruiter_id),
-    staffingOrganizationId: String(row.staffing_organization_id),
-    endClientOrganizationId: row.end_client_organization_id
-      ? String(row.end_client_organization_id)
-      : null,
-    title: String(row.title),
+    staffingOrganizationId: String(
+      manual("staffing_organization_id") ?? row.staffing_organization_id,
+    ),
+    endClientOrganizationId:
+      manual("end_client_organization_id") === null
+        ? null
+        : String(manual("end_client_organization_id") ?? row.end_client_organization_id ?? "") ||
+          null,
+    title: String(manual("title") ?? row.title),
     sourceKey: String(row.source_key),
-    introducedAt: String(row.introduced_at),
+    introducedAt: String(manual("introduced_at") ?? row.introduced_at),
   };
 }
 
@@ -405,7 +448,7 @@ export function createRepository(database: AppDatabase): AppRepository {
         ownerId,
         recruiterId,
       );
-      const opportunities = opportunityRows.map(toOpportunity);
+      const opportunities = opportunityRows.map((row) => toOpportunity(database, row));
       const metricOpportunities = opportunities.map((opportunity) => ({
         submitted: Boolean(
           one(
@@ -436,14 +479,31 @@ export function createRepository(database: AppDatabase): AppRepository {
               : null,
         },
         opportunities,
-        metrics: deriveRecruiterMetrics(
-          timelineRows.map((event) => ({
-            occurredAt: event.occurred_at,
-            direction: event.direction,
-            conversationId: event.conversation_id,
-          })),
-          metricOpportunities,
-        ),
+        metrics: timelineRows.length
+          ? deriveRecruiterMetrics(
+              timelineRows.map((event) => ({
+                occurredAt: event.occurred_at,
+                direction: event.direction,
+                conversationId: event.conversation_id,
+              })),
+              metricOpportunities,
+            )
+          : {
+              firstContact: "Unknown",
+              lastContact: "Unknown",
+              recruiterMessages: 0,
+              candidateReplies: 0,
+              inferredFollowUps: 0,
+              currentUnansweredSide: "none",
+              unansweredDurationMilliseconds: 0,
+              lastResponseLatencyMilliseconds: null,
+              candidateMedianResponseLatencyMilliseconds: null,
+              recruiterMedianResponseLatencyMilliseconds: null,
+              opportunities: metricOpportunities.length,
+              explicitSubmissions: metricOpportunities.filter(({ submitted }) => submitted).length,
+              unknownOutcomes: metricOpportunities.filter(({ outcomeKnown }) => !outcomeKnown)
+                .length,
+            },
       } satisfies RecruiterDetail;
     },
 
@@ -520,16 +580,38 @@ export function createRepository(database: AppDatabase): AppRepository {
           reviewState:
             item.decision ?? (item.review_requirement === "none" ? "accepted" : "proposed"),
         })) as OpportunityStageEvidence[];
-        const outcome = String(row.outcome_state) as OpportunityOutcome;
+        const manualOutcome = latestManualAssertion(
+          database,
+          ownerId,
+          "opportunity",
+          String(row.id),
+          "outcome_state",
+        );
+        const manualTitle = latestManualAssertion(
+          database,
+          ownerId,
+          "opportunity",
+          String(row.id),
+          "title",
+        );
+        const outcome = String(manualOutcome?.value ?? row.outcome_state) as OpportunityOutcome;
         return {
-          ...toOpportunity(row),
+          ...toOpportunity(database, row),
           outcome,
           staffingOrganization: String(row.staffing_name),
           endClientOrganization: row.client_name ? String(row.client_name) : null,
           submitted: Boolean(row.submitted),
           stage: deriveOpportunityStage(evidenceRows, outcome),
           excluded: false,
-        };
+          provenance: {
+            title: manualTitle ? "manual" : "machine",
+            outcome: manualOutcome ? "manual" : "machine",
+          },
+          fallbackValues: {
+            title: manualTitle ? row.title : null,
+            outcome: manualOutcome ? row.outcome_state : null,
+          },
+        } satisfies OpportunitySummary;
       });
       const hasMore = rows.length > limit;
       const items = mapped;
@@ -598,15 +680,37 @@ export function createRepository(database: AppDatabase): AppRepository {
             ? "accepted"
             : "proposed")) as OpportunityStageEvidence["reviewState"],
       }));
-      const outcome = String(row.outcome_state) as OpportunityOutcome;
+      const manualOutcome = latestManualAssertion(
+        database,
+        ownerId,
+        "opportunity",
+        opportunityId,
+        "outcome_state",
+      );
+      const manualTitle = latestManualAssertion(
+        database,
+        ownerId,
+        "opportunity",
+        opportunityId,
+        "title",
+      );
+      const outcome = String(manualOutcome?.value ?? row.outcome_state) as OpportunityOutcome;
       const summary: OpportunitySummary = {
-        ...toOpportunity(row),
+        ...toOpportunity(database, row),
         outcome,
         staffingOrganization: String(row.staffing_name),
         endClientOrganization: row.client_name ? String(row.client_name) : null,
         submitted: Boolean(row.submitted),
         stage: deriveOpportunityStage(evidence, outcome),
         excluded: false,
+        provenance: {
+          title: manualTitle ? "manual" : "machine",
+          outcome: manualOutcome ? "manual" : "machine",
+        },
+        fallbackValues: {
+          title: manualTitle ? row.title : null,
+          outcome: manualOutcome ? row.outcome_state : null,
+        },
       };
       return { ...summary, stageHistory: deriveOpportunityStageHistory(evidence, outcome) };
     },
@@ -909,7 +1013,7 @@ export function createRepository(database: AppDatabase): AppRepository {
           excludedRecruiters.add(String((identity as Record<string, unknown>).recruiter_id));
       return {
         exportedAt,
-        formatVersion: 1,
+        formatVersion: 3,
         owner: { id: owner.id, displayName: owner.display_name },
         recruiters: (scoped("recruiters") as Record<string, unknown>[]).map((row) => ({
           ...row,
@@ -948,6 +1052,17 @@ export function createRepository(database: AppDatabase): AppRepository {
         relationshipStatuses,
         identityExclusions,
         recruiterDeletions: scoped("recruiter_deletions"),
+        importSourceRecords: scoped("import_source_records"),
+        manualAssertions: scoped("manual_assertions").map((value) => {
+          const row = value as Record<string, unknown>;
+          return {
+            ...row,
+            value: JSON.parse(String(row.value_json)),
+            value_json: undefined,
+            provenance: "user_manual",
+            effective: row.retracted_at === null,
+          };
+        }),
       } satisfies PortableExport;
     },
   };

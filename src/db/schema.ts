@@ -213,6 +213,48 @@ export const recruiterDeletions = sqliteTable(
   ],
 );
 
+export const manualAssertions = sqliteTable(
+  "manual_assertions",
+  {
+    id: text().primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => owners.id, { onDelete: "restrict" }),
+    entityKind: text("entity_kind").notNull(),
+    entityId: text("entity_id").notNull(),
+    fieldName: text("field_name").notNull(),
+    valueJson: text("value_json").notNull(),
+    sourceReferenceId: text("source_reference_id")
+      .notNull()
+      .references(() => sourceReferences.id, { onDelete: "restrict" }),
+    supersedesAssertionId: text("supersedes_assertion_id"),
+    retractedAt: text("retracted_at"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("manual_assertions_owner_entity_field_time_idx").on(
+      table.ownerId,
+      table.entityKind,
+      table.entityId,
+      table.fieldName,
+      table.createdAt,
+      table.id,
+    ),
+    index("manual_assertions_owner_source_idx").on(table.ownerId, table.sourceReferenceId),
+    uniqueIndex("manual_assertions_supersedes_uq")
+      .on(table.supersedesAssertionId)
+      .where(sql`${table.supersedesAssertionId} is not null`),
+    check(
+      "manual_assertions_entity_check",
+      sql`${table.entityKind} in ('recruiter', 'recruiter_identity', 'recruiter_affiliation', 'organization', 'opportunity')`,
+    ),
+    check(
+      "manual_assertions_value_size_check",
+      sql`length(cast(${table.valueJson} as blob)) <= 16384`,
+    ),
+  ],
+);
+
 export const submissions = sqliteTable(
   "submissions",
   {
@@ -443,6 +485,7 @@ export const historicalImports = sqliteTable(
       .notNull()
       .references(() => owners.id, { onDelete: "restrict" }),
     sourceFingerprint: text("source_fingerprint"),
+    sourceKind: text("source_kind").notNull().default("gmail_mbox"),
     originalNameDisplay: text("original_name_display").notNull(),
     sourceSizeBytes: integer("source_size_bytes").notNull().default(0),
     stagedExpiresAt: text("staged_expires_at"),
@@ -494,6 +537,7 @@ export const importCheckpoints = sqliteTable(
       .notNull()
       .references(() => historicalImports.id, { onDelete: "cascade" }),
     sourceFingerprint: text("source_fingerprint").notNull(),
+    logicalCursorJson: text("logical_cursor_json"),
     committedByteOffset: integer("committed_byte_offset").notNull().default(0),
     messageOrdinal: integer("message_ordinal").notNull().default(0),
     discoveredCount: integer("discovered_count").notNull().default(0),
@@ -512,6 +556,43 @@ export const importCheckpoints = sqliteTable(
       "import_checkpoints_values_check",
       sql`${table.committedByteOffset} >= 0 and ${table.messageOrdinal} >= 0 and ${table.discoveredCount} >= 0 and ${table.parsedCount} >= 0 and ${table.skippedCount} >= 0 and ${table.duplicateCount} >= 0 and ${table.failedCount} >= 0 and ${table.importedCount} >= 0`,
     ),
+  ],
+);
+
+export const importSourceRecords = sqliteTable(
+  "import_source_records",
+  {
+    id: text().primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => owners.id, { onDelete: "restrict" }),
+    historicalImportId: text("historical_import_id")
+      .notNull()
+      .references(() => historicalImports.id, { onDelete: "cascade" }),
+    datasetKind: text("dataset_kind").notNull(),
+    rowOrdinal: integer("row_ordinal").notNull(),
+    rowSha256: text("row_sha256").notNull(),
+    normalizedJson: text("normalized_json").notNull(),
+    parseStatus: text("parse_status").notNull(),
+    errorCode: text("error_code"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    uniqueIndex("import_source_records_import_dataset_row_uq").on(
+      table.historicalImportId,
+      table.datasetKind,
+      table.rowOrdinal,
+    ),
+    index("import_source_records_owner_import_idx").on(table.ownerId, table.historicalImportId),
+    check(
+      "import_source_records_dataset_check",
+      sql`${table.datasetKind} in ('connections', 'invitations', 'job_applications')`,
+    ),
+    check(
+      "import_source_records_status_check",
+      sql`${table.parseStatus} in ('parsed', 'failed', 'ignored')`,
+    ),
+    check("import_source_records_row_check", sql`${table.rowOrdinal} > 0`),
   ],
 );
 
@@ -738,7 +819,7 @@ export const classificationProposals = sqliteTable(
     ),
     check(
       "classification_proposals_type_check",
-      sql`${table.proposalType} in ('message_direction', 'recruiter_identity', 'identity_link', 'organization_affiliation', 'opportunity', 'conversation_group', 'submission')`,
+      sql`${table.proposalType} in ('message_direction', 'recruiter_identity', 'identity_link', 'organization_affiliation', 'opportunity', 'conversation_group', 'submission', 'linkedin_export_row', 'linkedin_notification')`,
     ),
     check(
       "classification_proposals_confidence_check",

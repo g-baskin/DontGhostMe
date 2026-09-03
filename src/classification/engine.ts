@@ -9,6 +9,7 @@ import type {
   MessageDirection,
   ProposedValue,
 } from "@/domain/classification";
+import { linkedinNotificationProposals } from "./linkedin-notifications";
 import { CLASSIFICATION_LIMITS, SIGNAL_WEIGHTS } from "./rules";
 
 const recruiterTitle =
@@ -55,6 +56,15 @@ export function classifyDirection(
 }
 
 export function classifyMessage(
+  message: ClassificationMessage,
+  ownerEmails: ReadonlySet<string>,
+): ClassificationProposalDraft[] {
+  const proposals = classifyMessageCore(message, ownerEmails);
+  proposals.push(...linkedinNotificationProposals(message));
+  return proposals;
+}
+
+function classifyMessageCore(
   message: ClassificationMessage,
   ownerEmails: ReadonlySet<string>,
 ): ClassificationProposalDraft[] {
@@ -325,7 +335,7 @@ function cleanCapture(value: string) {
     .slice(0, 80);
 }
 
-function stableHash(value: string) {
+export function stableHash(value: string) {
   return createHash("sha256").update(value).digest("hex");
 }
 

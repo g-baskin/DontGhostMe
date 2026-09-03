@@ -2,10 +2,12 @@ import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getRecruiterDetail } from "@/application/get-recruiter-detail";
-import { repository, syntheticOwnerId } from "@/application/server";
+import { database, repository, syntheticOwnerId } from "@/application/server";
 import { EvidenceTimeline } from "@/components/evidence-timeline";
+import { ManualCorrectionForm } from "@/components/manual-correction-form";
 import { MetricLedger } from "@/components/metric-ledger";
 import { RelationshipControls } from "@/components/relationship-controls";
+import { latestManualAssertion } from "@/db/manual-assertions";
 
 export const runtime = "nodejs";
 
@@ -28,6 +30,13 @@ export default async function RecruiterDetailPage({
     direction === "previous" ? "previous" : "next",
   );
   if (!recruiter) notFound();
+  const manualName = latestManualAssertion(
+    database,
+    syntheticOwnerId,
+    "recruiter",
+    recruiter.id,
+    "canonical_name",
+  );
 
   return (
     <>
@@ -38,6 +47,21 @@ export default async function RecruiterDetailPage({
           Agency change appears only after confirmation.
         </p>
       </header>
+      <section className="section" aria-labelledby="manual-data">
+        <h2 className="section-heading" id="manual-data">
+          Manual data
+        </h2>
+        <ManualCorrectionForm
+          entityId={recruiter.id}
+          entityKind="recruiter"
+          fieldName="canonical_name"
+          label="Recruiter name"
+          currentValue={recruiter.canonicalName}
+          fallbackValue={recruiter.fallbackValues.canonicalName as string | null}
+          revision={manualName?.revision ?? 0}
+          assertionId={manualName?.id}
+        />
+      </section>
       <section className="section" aria-labelledby="relationship-controls">
         <h2 className="section-heading" id="relationship-controls">
           Relationship controls

@@ -59,16 +59,27 @@ export function validateMboxSelection(originalName: string, declaredSize: number
   return displayName;
 }
 
-export async function stageMbox(
+export function validateLinkedInSelection(originalName: string, declaredSize: number | null) {
+  const displayName = sanitizeDisplayName(originalName);
+  if (![".zip", ".csv"].includes(extname(displayName).toLowerCase()))
+    throw new HistoricalImportError("invalid_filename", false);
+  if (
+    declaredSize !== null &&
+    (!Number.isSafeInteger(declaredSize) || declaredSize < 0 || declaredSize > 250 * 1024 * 1024)
+  )
+    throw new HistoricalImportError("source_too_large", false);
+  return displayName;
+}
+
+async function stageSource(
   importId: string,
-  originalName: string,
+  displayName: string,
   declaredSize: number | null,
   chunks: AsyncIterable<Uint8Array>,
-  root = defaultStagingRoot(),
-  maximumSourceBytes = IMPORT_LIMITS.sourceBytes,
+  root: string,
+  maximumSourceBytes: number,
+  allowArchive: boolean,
 ): Promise<StagedSource> {
-  const displayName = validateMboxSelection(originalName, declaredSize);
-
   const paths = containedPath(root, importId);
   await mkdir(paths.root, { recursive: true, mode: 0o700 });
   await mkdir(paths.directory, { mode: 0o700 });
@@ -85,7 +96,8 @@ export async function stageMbox(
       if (prefix.byteLength < 512) {
         const remaining = 512 - prefix.byteLength;
         prefix = Buffer.concat([prefix, Buffer.from(chunk.subarray(0, remaining))]);
-        if (archiveMagic(prefix)) throw new HistoricalImportError("unsupported_archive", false);
+        if (!allowArchive && archiveMagic(prefix))
+          throw new HistoricalImportError("unsupported_archive", false);
       }
       hash.update(chunk);
       let written = 0;
@@ -97,7 +109,8 @@ export async function stageMbox(
     }
     if (declaredSize !== null && size !== declaredSize)
       throw new HistoricalImportError("invalid_request", false);
-    if (archiveMagic(prefix)) throw new HistoricalImportError("unsupported_archive", false);
+    if (!allowArchive && archiveMagic(prefix))
+      throw new HistoricalImportError("unsupported_archive", false);
     await handle.sync();
     await handle.close();
     await rename(partial, paths.source);
@@ -114,6 +127,43 @@ export async function stageMbox(
     await rm(paths.directory, { recursive: true, force: true });
     throw error;
   }
+}
+
+export async function stageMbox(
+  importId: string,
+  originalName: string,
+  declaredSize: number | null,
+  chunks: AsyncIterable<Uint8Array>,
+  root = defaultStagingRoot(),
+  maximumSourceBytes = IMPORT_LIMITS.sourceBytes,
+): Promise<StagedSource> {
+  return stageSource(
+    importId,
+    validateMboxSelection(originalName, declaredSize),
+    declaredSize,
+    chunks,
+    root,
+    maximumSourceBytes,
+    false,
+  );
+}
+
+export async function stageLinkedInExport(
+  importId: string,
+  originalName: string,
+  declaredSize: number | null,
+  chunks: AsyncIterable<Uint8Array>,
+  root = defaultStagingRoot(),
+) {
+  return stageSource(
+    importId,
+    validateLinkedInSelection(originalName, declaredSize),
+    declaredSize,
+    chunks,
+    root,
+    250 * 1024 * 1024,
+    true,
+  );
 }
 
 export function getStagedSourcePath(importId: string, root = defaultStagingRoot()) {

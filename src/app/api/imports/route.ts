@@ -26,10 +26,28 @@ export async function POST(request: Request) {
     const body = await readBoundedJson(request);
     if (!body || typeof body !== "object")
       throw new HistoricalImportError("invalid_request", false);
-    const { name, size } = body as { name?: unknown; size?: unknown };
-    if (typeof name !== "string" || typeof size !== "number")
+    const {
+      name,
+      size,
+      sourceKind = "gmail_mbox",
+    } = body as {
+      name?: unknown;
+      size?: unknown;
+      sourceKind?: unknown;
+    };
+    if (
+      typeof name !== "string" ||
+      typeof size !== "number" ||
+      !["gmail_mbox", "linkedin_export"].includes(String(sourceKind))
+    )
       throw new HistoricalImportError("invalid_request", false);
-    const id = beginHistoricalImport(database, syntheticOwnerId, name, size);
+    const id = beginHistoricalImport(
+      database,
+      syntheticOwnerId,
+      name,
+      size,
+      sourceKind as "gmail_mbox" | "linkedin_export",
+    );
     return privateJson(
       { import: listHistoricalImports(database, syntheticOwnerId).find((item) => item.id === id) },
       { status: 201 },
