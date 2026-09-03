@@ -472,6 +472,45 @@
     padding: var(--space-2) var(--space-4);
     font-weight: 700;
   }
+
+  .filter-form,
+  .control-stack {
+    display: grid;
+    gap: var(--space-3);
+    max-inline-size: var(--reading);
+    margin-block-end: var(--space-6);
+  }
+
+  .filter-form label {
+    font-weight: 700;
+  }
+
+  .filter-form input[type="checkbox"] {
+    inline-size: 1.5rem;
+    min-block-size: 1.5rem;
+    margin-inline-end: var(--space-2);
+    vertical-align: middle;
+    accent-color: var(--royal);
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-block-start: var(--space-8);
+  }
+
+  .empty-state {
+    display: grid;
+    gap: var(--space-3);
+    border: 2px dashed var(--line);
+    padding: var(--space-6);
+  }
+
+  button.danger {
+    border-color: var(--crimson);
+    background: var(--crimson);
+  }
 }
 
 @layer utilities {

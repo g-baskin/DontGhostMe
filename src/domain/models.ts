@@ -32,6 +32,22 @@ export interface Affiliation {
   reviewState: ReviewState;
 }
 
+export type RelationshipStatus = "active" | "dormant" | "do_not_contact" | null;
+export type OpportunityOutcome =
+  | "unknown"
+  | "rejected"
+  | "offer"
+  | "candidate_withdrew"
+  | "closed_without_outcome";
+export type OpportunityStage =
+  | "not_started"
+  | "discussed"
+  | "resume_requested"
+  | "right_to_represent"
+  | "submitted"
+  | "interview"
+  | "terminal";
+
 export interface Opportunity {
   id: Id;
   ownerId: Id;
@@ -41,6 +57,35 @@ export interface Opportunity {
   title: string;
   sourceKey: string;
   introducedAt: IsoTimestamp;
+  outcome?: OpportunityOutcome;
+}
+
+export interface OpportunityStageEvidence {
+  evidenceId: Id;
+  factType: string;
+  occurredAt: IsoTimestamp;
+  sourceKey: string;
+  confidenceBasisPoints: number;
+  inferred: boolean;
+  reviewState: ReviewState;
+}
+
+export interface OpportunityStageHistoryEntry extends OpportunityStageEvidence {
+  stage: OpportunityStage;
+}
+
+export interface CursorPage<T> {
+  items: T[];
+  nextCursor: string | null;
+  previousCursor: string | null;
+}
+
+export interface ResponseLatency {
+  conversationId: Id;
+  responder: "candidate" | "recruiter";
+  startedAt: IsoTimestamp;
+  respondedAt: IsoTimestamp;
+  milliseconds: number;
 }
 
 export type MessageDirection = "recruiter_to_candidate" | "candidate_to_recruiter";
@@ -78,6 +123,10 @@ export interface RecruiterMetrics {
   candidateReplies: number;
   inferredFollowUps: number;
   currentUnansweredSide: "candidate" | "recruiter" | "none";
+  unansweredDurationMilliseconds: number;
+  lastResponseLatencyMilliseconds: number | null;
+  candidateMedianResponseLatencyMilliseconds: number | null;
+  recruiterMedianResponseLatencyMilliseconds: number | null;
   opportunities: number;
   explicitSubmissions: number;
   unknownOutcomes: number;

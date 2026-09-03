@@ -1,8 +1,10 @@
 # DontGhostMe Roadmap
 
+![DontGhostMe roadmap through milestones M0 to M6](./docs/assets/dontghostme-roadmap.png)
+
 This roadmap sequences learning and risk reduction. A milestone is not automatically approved merely because it appears here. Complete planning and obtain user approval before implementing a milestone that introduces external services, sensitive data, or irreversible architecture.
 
-**Current status (2026-09-03):** M0, M1, and M2 are implemented and locally verified. M1 carries the user's accepted soft runtime-matrix follow-up. M3 relationship views and analytics is the next planning milestone.
+**Current status (2026-09-03):** M0, M1, M2, and M3 are implemented and locally verified. M1 carries the user's accepted soft runtime-matrix follow-up. M4 remains deferred until its security, privacy, authentication, and retention prerequisites are explicitly approved.
 
 ## M0 — Product scaffold ✅
 
@@ -76,7 +78,7 @@ Exit criteria:
 - Ambiguous people are not merged by name alone.
 - Unknown outcomes remain first-class.
 
-## M3 — Useful local product
+## M3 — Useful local product ✅
 
 **Goal:** Make the imported history useful without a persistent mailbox connection.
 

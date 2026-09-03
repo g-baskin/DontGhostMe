@@ -42,7 +42,7 @@ reports/scan-output/
 
 .local/
 backups/
-.gg/screenshots/
+.gg/
 
 # Logs and temporary files
 *.log

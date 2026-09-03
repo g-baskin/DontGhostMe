@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Route } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getRecruiterDetail } from "@/application/get-recruiter-detail";
 import { repository, syntheticOwnerId } from "@/application/server";
 import { EvidenceTimeline } from "@/components/evidence-timeline";
 import { MetricLedger } from "@/components/metric-ledger";
+import { RelationshipControls } from "@/components/relationship-controls";
 
 export const runtime = "nodejs";
 
@@ -11,11 +13,20 @@ export const metadata: Metadata = { title: "Recruiter evidence" };
 
 export default async function RecruiterDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ recruiterId: string }>;
+  searchParams: Promise<{ cursor?: string; direction?: string }>;
 }) {
   const { recruiterId } = await params;
-  const recruiter = getRecruiterDetail(repository, syntheticOwnerId, recruiterId);
+  const { cursor, direction } = await searchParams;
+  const recruiter = getRecruiterDetail(
+    repository,
+    syntheticOwnerId,
+    recruiterId,
+    cursor,
+    direction === "previous" ? "previous" : "next",
+  );
   if (!recruiter) notFound();
 
   return (
@@ -27,6 +38,16 @@ export default async function RecruiterDetailPage({
           Agency change appears only after confirmation.
         </p>
       </header>
+      <section className="section" aria-labelledby="relationship-controls">
+        <h2 className="section-heading" id="relationship-controls">
+          Relationship controls
+        </h2>
+        <RelationshipControls
+          recruiterId={recruiter.id}
+          status={recruiter.relationshipStatus}
+          excluded={recruiter.excluded}
+        />
+      </section>
       <section className="section" aria-labelledby="identity-history">
         <h2 className="section-heading" id="identity-history">
           Identity history
@@ -44,6 +65,10 @@ export default async function RecruiterDetailPage({
         <h2 className="section-heading" id="relationship-metrics">
           Relationship metrics
         </h2>
+        <p className="source-note">
+          Response latency pairs direction changes inside one conversation. Medians require three
+          qualifying responses. Unanswered duration starts at the final message.
+        </p>
         <MetricLedger metrics={recruiter.metrics} />
       </section>
       <section className="section" aria-labelledby="opportunity-history">
@@ -63,6 +88,41 @@ export default async function RecruiterDetailPage({
           Evidence chronology
         </h2>
         <EvidenceTimeline events={recruiter.timeline} />
+        <nav className="pagination" aria-label="Recruiter timeline pages">
+          {recruiter.timelinePage?.previousCursor ? (
+            <Link
+              href={
+                `/recruiters/${recruiter.id}?cursor=${encodeURIComponent(recruiter.timelinePage.previousCursor)}&direction=previous` as Route
+              }
+            >
+              Previous timeline page
+            </Link>
+          ) : (
+            <span>Previous timeline page unavailable</span>
+          )}
+          {recruiter.timelinePage?.nextCursor ? (
+            <Link
+              href={
+                `/recruiters/${recruiter.id}?cursor=${encodeURIComponent(recruiter.timelinePage.nextCursor)}&direction=next` as Route
+              }
+            >
+              Next timeline page
+            </Link>
+          ) : (
+            <span>Next timeline page unavailable</span>
+          )}
+        </nav>
+      </section>
+      <section className="section reading-width" aria-labelledby="delete-data">
+        <h2 className="section-heading" id="delete-data">
+          Delete recruiter data
+        </h2>
+        <p>
+          Deletion removes derived recruiter records permanently. Imported source messages remain.
+        </p>
+        <Link href={`/recruiters/${recruiter.id}/delete` as Route}>
+          Review deletion consequences
+        </Link>
       </section>
     </>
   );

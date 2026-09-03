@@ -1,9 +1,14 @@
 import type {
+  CursorPage,
   Id,
   Opportunity,
+  OpportunityOutcome,
+  OpportunityStage,
+  OpportunityStageHistoryEntry,
   Recruiter,
   RecruiterIdentity,
   RecruiterMetrics,
+  RelationshipStatus,
   ReviewDecision,
   ReviewItem,
   TimelineEvent,
@@ -15,19 +20,48 @@ export interface RecruiterSummary extends Recruiter {
   currentAffiliation: string;
   lastContact: string;
   unresolvedItems: number;
+  relationshipStatus: RelationshipStatus;
+  excluded: boolean;
+  possibleCompanyChange: boolean;
 }
 
 export interface OpportunitySummary extends Opportunity {
   staffingOrganization: string;
   endClientOrganization: string | null;
   submitted: boolean;
-  outcome: "unknown" | "not_started";
+  outcome: OpportunityOutcome;
+  stage: OpportunityStage;
+  excluded: boolean;
+}
+
+export interface RecruiterFilters {
+  search?: string;
+  status?: Exclude<RelationshipStatus, null>;
+  unresolved?: boolean;
+  possibleCompanyChange?: boolean;
+  excluded?: boolean;
+  cursor?: string;
+  direction?: "next" | "previous";
+  limit?: number;
+}
+
+export interface OpportunityFilters {
+  stage?: OpportunityStage;
+  outcome?: OpportunityOutcome;
+  cursor?: string;
+  direction?: "next" | "previous";
+  limit?: number;
+}
+
+export interface OpportunityDetail extends OpportunitySummary {
+  stageHistory: OpportunityStageHistoryEntry[];
 }
 
 export interface RecruiterDetail extends RecruiterSummary {
   timeline: TimelineEvent[];
   metrics: RecruiterMetrics;
   opportunities: Opportunity[];
+  timelinePage?: CursorPage<TimelineEvent>;
 }
 
 export interface PortableExport {
@@ -58,15 +92,41 @@ export interface PortableExport {
   classificationProposals: unknown[];
   classificationEvidence: unknown[];
   classificationDecisions: unknown[];
+  relationshipStatuses: unknown[];
+  identityExclusions: unknown[];
+  recruiterDeletions: unknown[];
 }
 
 export interface ReadRepository {
   getHome(ownerId: Id): RecruiterDetail;
   listRecruiters(ownerId: Id): RecruiterSummary[];
-  getRecruiter(ownerId: Id, recruiterId: Id): RecruiterDetail | null;
+  queryRecruiters(ownerId: Id, filters?: RecruiterFilters): CursorPage<RecruiterSummary>;
+  getRecruiter(
+    ownerId: Id,
+    recruiterId: Id,
+    cursor?: string,
+    direction?: "next" | "previous",
+  ): RecruiterDetail | null;
   listOpportunities(ownerId: Id): OpportunitySummary[];
+  queryOpportunities(ownerId: Id, filters?: OpportunityFilters): CursorPage<OpportunitySummary>;
+  getOpportunity(ownerId: Id, opportunityId: Id): OpportunityDetail | null;
   listReviewItems(ownerId: Id): ReviewItem[];
   exportData(ownerId: Id, exportedAt: string): PortableExport;
+}
+
+export interface RelationshipRepository {
+  setRelationshipStatus(
+    ownerId: Id,
+    recruiterId: Id,
+    status: RelationshipStatus,
+    now: string,
+  ): void;
+  excludeRecruiter(ownerId: Id, recruiterId: Id, now: string): void;
+  restoreRecruiter(ownerId: Id, recruiterId: Id, now: string): void;
+  excludeIdentity(ownerId: Id, identityId: Id, reason: string | null, now: string): void;
+  excludeDomain(ownerId: Id, domain: string, reason: string | null, now: string): void;
+  restoreIdentityExclusion(ownerId: Id, exclusionId: Id): void;
+  deleteRecruiterData(ownerId: Id, recruiterId: Id, now: string): void;
 }
 
 export interface ReviewRepository {
@@ -78,4 +138,4 @@ export interface ReviewRepository {
   ): { revision: number };
 }
 
-export type AppRepository = ReadRepository & ReviewRepository;
+export type AppRepository = ReadRepository & ReviewRepository & RelationshipRepository;

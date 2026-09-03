@@ -94,6 +94,11 @@ describe("SQLite repository", () => {
     expect(exported.importBatches).toHaveLength(1);
     expect(exported.historicalImports).toEqual([]);
     expect(exported.importCheckpoints).toEqual([]);
+    expect(exported.relationshipStatuses).toEqual([]);
+    expect(exported.identityExclusions).toEqual([]);
+    expect(exported.recruiterDeletions).toEqual([]);
+    expect(exported.recruiters[0]).toMatchObject({ excluded: false });
+    expect(exported.recruiterIdentities[0]).toMatchObject({ excluded: false });
     expect(exported.importSourceMessages).toEqual([]);
     expect(exported.normalizedMessages).toEqual([]);
     expect(exported.attachmentInventory).toEqual([]);
