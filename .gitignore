@@ -1,0 +1,39 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Real or generated personal data — never commit mailbox or recruiter data
+/data/
+/imports/
+/uploads/
+/private/
+/local-data/
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Dependencies and generated output
+node_modules/
+dist/
+build/
+coverage/
+.next/
+.turbo/
+.cache/
+
+# Logs and temporary files
+*.log
+/tmp/
+.temp/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
