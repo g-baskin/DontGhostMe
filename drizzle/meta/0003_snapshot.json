@@ -1,0 +1,3436 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "c4e3295b-67fd-433a-b77f-f2326592a288",
+  "prevId": "e306dfae-0cca-4f54-ab0a-319dd19c3fce",
+  "tables": {
+    "attachment_inventory": {
+      "name": "attachment_inventory",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_message_id": {
+          "name": "source_message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ordinal": {
+          "name": "ordinal",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "filename_display": {
+          "name": "filename_display",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "media_type": {
+          "name": "media_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "disposition": {
+          "name": "disposition",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "decoded_size_bytes": {
+          "name": "decoded_size_bytes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "content_sha256": {
+          "name": "content_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "oversized": {
+          "name": "oversized",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "attachment_inventory_source_ordinal_uq": {
+          "name": "attachment_inventory_source_ordinal_uq",
+          "columns": [
+            "source_message_id",
+            "ordinal"
+          ],
+          "isUnique": true
+        },
+        "attachment_inventory_owner_source_idx": {
+          "name": "attachment_inventory_owner_source_idx",
+          "columns": [
+            "owner_id",
+            "source_message_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "attachment_inventory_owner_id_owners_id_fk": {
+          "name": "attachment_inventory_owner_id_owners_id_fk",
+          "tableFrom": "attachment_inventory",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "attachment_inventory_source_message_id_import_source_messages_id_fk": {
+          "name": "attachment_inventory_source_message_id_import_source_messages_id_fk",
+          "tableFrom": "attachment_inventory",
+          "tableTo": "import_source_messages",
+          "columnsFrom": [
+            "source_message_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "attachment_inventory_values_check": {
+          "name": "attachment_inventory_values_check",
+          "value": "\"attachment_inventory\".\"ordinal\" >= 0 and \"attachment_inventory\".\"decoded_size_bytes\" >= 0"
+        }
+      }
+    },
+    "classification_decisions": {
+      "name": "classification_decisions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "proposal_id": {
+          "name": "proposal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "revision": {
+          "name": "revision",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "decision": {
+          "name": "decision",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "corrected_value_json": {
+          "name": "corrected_value_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "classification_decisions_owner_proposal_revision_uq": {
+          "name": "classification_decisions_owner_proposal_revision_uq",
+          "columns": [
+            "owner_id",
+            "proposal_id",
+            "revision"
+          ],
+          "isUnique": true
+        },
+        "classification_decisions_owner_proposal_idx": {
+          "name": "classification_decisions_owner_proposal_idx",
+          "columns": [
+            "owner_id",
+            "proposal_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "classification_decisions_owner_id_owners_id_fk": {
+          "name": "classification_decisions_owner_id_owners_id_fk",
+          "tableFrom": "classification_decisions",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "classification_decisions_proposal_id_classification_proposals_id_fk": {
+          "name": "classification_decisions_proposal_id_classification_proposals_id_fk",
+          "tableFrom": "classification_decisions",
+          "tableTo": "classification_proposals",
+          "columnsFrom": [
+            "proposal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "classification_decisions_revision_check": {
+          "name": "classification_decisions_revision_check",
+          "value": "\"classification_decisions\".\"revision\" > 0"
+        },
+        "classification_decisions_decision_check": {
+          "name": "classification_decisions_decision_check",
+          "value": "\"classification_decisions\".\"decision\" in ('accepted', 'rejected', 'corrected', 'merge', 'split')"
+        },
+        "classification_decisions_value_check": {
+          "name": "classification_decisions_value_check",
+          "value": "(\"classification_decisions\".\"decision\" = 'corrected' and \"classification_decisions\".\"corrected_value_json\" is not null and length(cast(\"classification_decisions\".\"corrected_value_json\" as blob)) <= 16384) or (\"classification_decisions\".\"decision\" != 'corrected' and \"classification_decisions\".\"corrected_value_json\" is null)"
+        }
+      }
+    },
+    "classification_evidence": {
+      "name": "classification_evidence",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "proposal_id": {
+          "name": "proposal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "normalized_message_id": {
+          "name": "normalized_message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "signal_code": {
+          "name": "signal_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "contribution_basis_points": {
+          "name": "contribution_basis_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "excerpt": {
+          "name": "excerpt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "excerpt_start": {
+          "name": "excerpt_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "excerpt_end": {
+          "name": "excerpt_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "classification_evidence_tuple_uq": {
+          "name": "classification_evidence_tuple_uq",
+          "columns": [
+            "proposal_id",
+            "normalized_message_id",
+            "signal_code",
+            "excerpt_start",
+            "excerpt_end"
+          ],
+          "isUnique": true
+        },
+        "classification_evidence_owner_proposal_idx": {
+          "name": "classification_evidence_owner_proposal_idx",
+          "columns": [
+            "owner_id",
+            "proposal_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "classification_evidence_owner_id_owners_id_fk": {
+          "name": "classification_evidence_owner_id_owners_id_fk",
+          "tableFrom": "classification_evidence",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "classification_evidence_proposal_id_classification_proposals_id_fk": {
+          "name": "classification_evidence_proposal_id_classification_proposals_id_fk",
+          "tableFrom": "classification_evidence",
+          "tableTo": "classification_proposals",
+          "columnsFrom": [
+            "proposal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "classification_evidence_normalized_message_id_normalized_messages_id_fk": {
+          "name": "classification_evidence_normalized_message_id_normalized_messages_id_fk",
+          "tableFrom": "classification_evidence",
+          "tableTo": "normalized_messages",
+          "columnsFrom": [
+            "normalized_message_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "classification_evidence_excerpt_check": {
+          "name": "classification_evidence_excerpt_check",
+          "value": "\"classification_evidence\".\"excerpt_start\" >= 0 and \"classification_evidence\".\"excerpt_end\" >= \"classification_evidence\".\"excerpt_start\" and length(\"classification_evidence\".\"excerpt\") <= 280"
+        }
+      }
+    },
+    "classification_proposals": {
+      "name": "classification_proposals",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "proposal_key": {
+          "name": "proposal_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "proposal_type": {
+          "name": "proposal_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "proposed_value_json": {
+          "name": "proposed_value_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "confidence_basis_points": {
+          "name": "confidence_basis_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "review_requirement": {
+          "name": "review_requirement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'proposed'"
+        },
+        "supersedes_proposal_id": {
+          "name": "supersedes_proposal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "promoted_entity_kind": {
+          "name": "promoted_entity_kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "promoted_entity_id": {
+          "name": "promoted_entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "classification_proposals_run_key_uq": {
+          "name": "classification_proposals_run_key_uq",
+          "columns": [
+            "run_id",
+            "proposal_key"
+          ],
+          "isUnique": true
+        },
+        "classification_proposals_owner_state_type_idx": {
+          "name": "classification_proposals_owner_state_type_idx",
+          "columns": [
+            "owner_id",
+            "state",
+            "proposal_type"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "classification_proposals_owner_id_owners_id_fk": {
+          "name": "classification_proposals_owner_id_owners_id_fk",
+          "tableFrom": "classification_proposals",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "classification_proposals_run_id_classification_runs_id_fk": {
+          "name": "classification_proposals_run_id_classification_runs_id_fk",
+          "tableFrom": "classification_proposals",
+          "tableTo": "classification_runs",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "classification_proposals_type_check": {
+          "name": "classification_proposals_type_check",
+          "value": "\"classification_proposals\".\"proposal_type\" in ('message_direction', 'recruiter_identity', 'identity_link', 'organization_affiliation', 'opportunity', 'conversation_group', 'submission')"
+        },
+        "classification_proposals_confidence_check": {
+          "name": "classification_proposals_confidence_check",
+          "value": "\"classification_proposals\".\"confidence_basis_points\" between 0 and 10000"
+        },
+        "classification_proposals_review_check": {
+          "name": "classification_proposals_review_check",
+          "value": "\"classification_proposals\".\"review_requirement\" in ('none', 'user_review')"
+        },
+        "classification_proposals_state_check": {
+          "name": "classification_proposals_state_check",
+          "value": "\"classification_proposals\".\"state\" in ('proposed', 'accepted', 'rejected', 'corrected', 'superseded')"
+        },
+        "classification_proposals_value_size_check": {
+          "name": "classification_proposals_value_size_check",
+          "value": "length(cast(\"classification_proposals\".\"proposed_value_json\" as blob)) <= 16384"
+        },
+        "classification_proposals_promotion_check": {
+          "name": "classification_proposals_promotion_check",
+          "value": "(\"classification_proposals\".\"promoted_entity_kind\" is null) = (\"classification_proposals\".\"promoted_entity_id\" is null)"
+        }
+      }
+    },
+    "classification_runs": {
+      "name": "classification_runs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "engine_version": {
+          "name": "engine_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ruleset_sha256": {
+          "name": "ruleset_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_set_sha256": {
+          "name": "source_set_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "processed_count": {
+          "name": "processed_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "proposal_count": {
+          "name": "proposal_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "checkpoint_message_id": {
+          "name": "checkpoint_message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "error_code": {
+          "name": "error_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "classification_runs_idempotency_uq": {
+          "name": "classification_runs_idempotency_uq",
+          "columns": [
+            "owner_id",
+            "engine_version",
+            "ruleset_sha256",
+            "source_set_sha256"
+          ],
+          "isUnique": true
+        },
+        "classification_runs_owner_status_idx": {
+          "name": "classification_runs_owner_status_idx",
+          "columns": [
+            "owner_id",
+            "status",
+            "updated_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "classification_runs_owner_id_owners_id_fk": {
+          "name": "classification_runs_owner_id_owners_id_fk",
+          "tableFrom": "classification_runs",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "classification_runs_status_check": {
+          "name": "classification_runs_status_check",
+          "value": "\"classification_runs\".\"status\" in ('running', 'completed', 'failed', 'superseded')"
+        },
+        "classification_runs_counts_check": {
+          "name": "classification_runs_counts_check",
+          "value": "\"classification_runs\".\"processed_count\" >= 0 and \"classification_runs\".\"proposal_count\" >= 0"
+        },
+        "classification_runs_error_check": {
+          "name": "classification_runs_error_check",
+          "value": "\"classification_runs\".\"error_code\" is null or \"classification_runs\".\"error_code\" = 'classification_failed'"
+        }
+      }
+    },
+    "communication_events": {
+      "name": "communication_events",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "conversation_id": {
+          "name": "conversation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_reference_id": {
+          "name": "source_reference_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recruiter_identity_id": {
+          "name": "recruiter_identity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "direction": {
+          "name": "direction",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "communication_events_source_uq": {
+          "name": "communication_events_source_uq",
+          "columns": [
+            "source_reference_id"
+          ],
+          "isUnique": true
+        },
+        "communication_events_timeline_idx": {
+          "name": "communication_events_timeline_idx",
+          "columns": [
+            "owner_id",
+            "conversation_id",
+            "occurred_at",
+            "id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "communication_events_owner_id_owners_id_fk": {
+          "name": "communication_events_owner_id_owners_id_fk",
+          "tableFrom": "communication_events",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "communication_events_conversation_id_conversations_id_fk": {
+          "name": "communication_events_conversation_id_conversations_id_fk",
+          "tableFrom": "communication_events",
+          "tableTo": "conversations",
+          "columnsFrom": [
+            "conversation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "communication_events_source_reference_id_source_references_id_fk": {
+          "name": "communication_events_source_reference_id_source_references_id_fk",
+          "tableFrom": "communication_events",
+          "tableTo": "source_references",
+          "columnsFrom": [
+            "source_reference_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "communication_events_recruiter_identity_id_recruiter_identities_id_fk": {
+          "name": "communication_events_recruiter_identity_id_recruiter_identities_id_fk",
+          "tableFrom": "communication_events",
+          "tableTo": "recruiter_identities",
+          "columnsFrom": [
+            "recruiter_identity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "communication_events_direction_check": {
+          "name": "communication_events_direction_check",
+          "value": "\"communication_events\".\"direction\" in ('recruiter_to_candidate', 'candidate_to_recruiter')"
+        }
+      }
+    },
+    "conversation_opportunities": {
+      "name": "conversation_opportunities",
+      "columns": {
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "conversation_id": {
+          "name": "conversation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "opportunity_id": {
+          "name": "opportunity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "conversation_opportunities_owner_id_owners_id_fk": {
+          "name": "conversation_opportunities_owner_id_owners_id_fk",
+          "tableFrom": "conversation_opportunities",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "conversation_opportunities_conversation_id_conversations_id_fk": {
+          "name": "conversation_opportunities_conversation_id_conversations_id_fk",
+          "tableFrom": "conversation_opportunities",
+          "tableTo": "conversations",
+          "columnsFrom": [
+            "conversation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "conversation_opportunities_opportunity_id_opportunities_id_fk": {
+          "name": "conversation_opportunities_opportunity_id_opportunities_id_fk",
+          "tableFrom": "conversation_opportunities",
+          "tableTo": "opportunities",
+          "columnsFrom": [
+            "opportunity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "conversation_opportunities_owner_id_conversation_id_opportunity_id_pk": {
+          "columns": [
+            "owner_id",
+            "conversation_id",
+            "opportunity_id"
+          ],
+          "name": "conversation_opportunities_owner_id_conversation_id_opportunity_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "conversations": {
+      "name": "conversations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recruiter_id": {
+          "name": "recruiter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "thread_key": {
+          "name": "thread_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subject": {
+          "name": "subject",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "conversations_owner_thread_key_uq": {
+          "name": "conversations_owner_thread_key_uq",
+          "columns": [
+            "owner_id",
+            "thread_key"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "conversations_owner_id_owners_id_fk": {
+          "name": "conversations_owner_id_owners_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "conversations_recruiter_id_recruiters_id_fk": {
+          "name": "conversations_recruiter_id_recruiters_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "recruiters",
+          "columnsFrom": [
+            "recruiter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "evidence_assertions": {
+      "name": "evidence_assertions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_reference_id": {
+          "name": "source_reference_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recruiter_id": {
+          "name": "recruiter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "opportunity_id": {
+          "name": "opportunity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "affiliation_id": {
+          "name": "affiliation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "fact_type": {
+          "name": "fact_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "canonical_value_json": {
+          "name": "canonical_value_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "excerpt": {
+          "name": "excerpt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "confidence_basis_points": {
+          "name": "confidence_basis_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "inferred": {
+          "name": "inferred",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "review_requirement": {
+          "name": "review_requirement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "evidence_assertions_source_idx": {
+          "name": "evidence_assertions_source_idx",
+          "columns": [
+            "owner_id",
+            "source_reference_id"
+          ],
+          "isUnique": false
+        },
+        "evidence_assertions_fact_type_idx": {
+          "name": "evidence_assertions_fact_type_idx",
+          "columns": [
+            "owner_id",
+            "fact_type"
+          ],
+          "isUnique": false
+        },
+        "evidence_assertions_recruiter_idx": {
+          "name": "evidence_assertions_recruiter_idx",
+          "columns": [
+            "owner_id",
+            "recruiter_id"
+          ],
+          "isUnique": false
+        },
+        "evidence_assertions_opportunity_idx": {
+          "name": "evidence_assertions_opportunity_idx",
+          "columns": [
+            "owner_id",
+            "opportunity_id"
+          ],
+          "isUnique": false
+        },
+        "evidence_assertions_review_idx": {
+          "name": "evidence_assertions_review_idx",
+          "columns": [
+            "owner_id",
+            "review_requirement"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "evidence_assertions_owner_id_owners_id_fk": {
+          "name": "evidence_assertions_owner_id_owners_id_fk",
+          "tableFrom": "evidence_assertions",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "evidence_assertions_source_reference_id_source_references_id_fk": {
+          "name": "evidence_assertions_source_reference_id_source_references_id_fk",
+          "tableFrom": "evidence_assertions",
+          "tableTo": "source_references",
+          "columnsFrom": [
+            "source_reference_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "evidence_assertions_recruiter_id_recruiters_id_fk": {
+          "name": "evidence_assertions_recruiter_id_recruiters_id_fk",
+          "tableFrom": "evidence_assertions",
+          "tableTo": "recruiters",
+          "columnsFrom": [
+            "recruiter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "evidence_assertions_opportunity_id_opportunities_id_fk": {
+          "name": "evidence_assertions_opportunity_id_opportunities_id_fk",
+          "tableFrom": "evidence_assertions",
+          "tableTo": "opportunities",
+          "columnsFrom": [
+            "opportunity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "evidence_assertions_affiliation_id_recruiter_affiliations_id_fk": {
+          "name": "evidence_assertions_affiliation_id_recruiter_affiliations_id_fk",
+          "tableFrom": "evidence_assertions",
+          "tableTo": "recruiter_affiliations",
+          "columnsFrom": [
+            "affiliation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "evidence_assertions_entity_check": {
+          "name": "evidence_assertions_entity_check",
+          "value": "\"evidence_assertions\".\"recruiter_id\" is not null or \"evidence_assertions\".\"opportunity_id\" is not null or \"evidence_assertions\".\"affiliation_id\" is not null"
+        },
+        "evidence_assertions_confidence_check": {
+          "name": "evidence_assertions_confidence_check",
+          "value": "\"evidence_assertions\".\"confidence_basis_points\" between 0 and 10000"
+        },
+        "evidence_assertions_review_requirement_check": {
+          "name": "evidence_assertions_review_requirement_check",
+          "value": "\"evidence_assertions\".\"review_requirement\" in ('none', 'user_review')"
+        }
+      }
+    },
+    "historical_imports": {
+      "name": "historical_imports",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_fingerprint": {
+          "name": "source_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "original_name_display": {
+          "name": "original_name_display",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_size_bytes": {
+          "name": "source_size_bytes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "staged_expires_at": {
+          "name": "staged_expires_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "staged_source_deleted": {
+          "name": "staged_source_deleted",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "discovered_count": {
+          "name": "discovered_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "parsed_count": {
+          "name": "parsed_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "skipped_count": {
+          "name": "skipped_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "duplicate_count": {
+          "name": "duplicate_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "failed_count": {
+          "name": "failed_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "imported_count": {
+          "name": "imported_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "last_error_code": {
+          "name": "last_error_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "historical_imports_owner_fingerprint_uq": {
+          "name": "historical_imports_owner_fingerprint_uq",
+          "columns": [
+            "owner_id",
+            "source_fingerprint"
+          ],
+          "isUnique": true
+        },
+        "historical_imports_owner_status_time_idx": {
+          "name": "historical_imports_owner_status_time_idx",
+          "columns": [
+            "owner_id",
+            "status",
+            "updated_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "historical_imports_owner_id_owners_id_fk": {
+          "name": "historical_imports_owner_id_owners_id_fk",
+          "tableFrom": "historical_imports",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "historical_imports_status_check": {
+          "name": "historical_imports_status_check",
+          "value": "\"historical_imports\".\"status\" in ('uploading', 'preview_ready', 'processing', 'paused_user', 'paused_interrupted', 'completed', 'failed', 'cancelled')"
+        },
+        "historical_imports_counts_check": {
+          "name": "historical_imports_counts_check",
+          "value": "\"historical_imports\".\"source_size_bytes\" >= 0 and \"historical_imports\".\"discovered_count\" >= 0 and \"historical_imports\".\"parsed_count\" >= 0 and \"historical_imports\".\"skipped_count\" >= 0 and \"historical_imports\".\"duplicate_count\" >= 0 and \"historical_imports\".\"failed_count\" >= 0 and \"historical_imports\".\"imported_count\" >= 0"
+        }
+      }
+    },
+    "identity_exclusions": {
+      "name": "identity_exclusions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "identity_id": {
+          "name": "identity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "domain": {
+          "name": "domain",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "excluded_at": {
+          "name": "excluded_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "identity_exclusions_identity_uq": {
+          "name": "identity_exclusions_identity_uq",
+          "columns": [
+            "owner_id",
+            "identity_id"
+          ],
+          "isUnique": true,
+          "where": "\"identity_exclusions\".\"identity_id\" is not null"
+        },
+        "identity_exclusions_domain_uq": {
+          "name": "identity_exclusions_domain_uq",
+          "columns": [
+            "owner_id",
+            "domain"
+          ],
+          "isUnique": true,
+          "where": "\"identity_exclusions\".\"domain\" is not null"
+        }
+      },
+      "foreignKeys": {
+        "identity_exclusions_owner_id_owners_id_fk": {
+          "name": "identity_exclusions_owner_id_owners_id_fk",
+          "tableFrom": "identity_exclusions",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "identity_exclusions_identity_id_recruiter_identities_id_fk": {
+          "name": "identity_exclusions_identity_id_recruiter_identities_id_fk",
+          "tableFrom": "identity_exclusions",
+          "tableTo": "recruiter_identities",
+          "columnsFrom": [
+            "identity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "identity_exclusions_target_check": {
+          "name": "identity_exclusions_target_check",
+          "value": "(\"identity_exclusions\".\"identity_id\" is null and \"identity_exclusions\".\"domain\" is not null) or (\"identity_exclusions\".\"identity_id\" is not null and \"identity_exclusions\".\"domain\" is null)"
+        },
+        "identity_exclusions_reason_check": {
+          "name": "identity_exclusions_reason_check",
+          "value": "\"identity_exclusions\".\"reason\" is null or length(\"identity_exclusions\".\"reason\") <= 280"
+        }
+      }
+    },
+    "import_batches": {
+      "name": "import_batches",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "batch_key": {
+          "name": "batch_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_set_hash": {
+          "name": "source_set_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "checkpoint_source_key": {
+          "name": "checkpoint_source_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "processed_count": {
+          "name": "processed_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "import_batches_owner_batch_key_uq": {
+          "name": "import_batches_owner_batch_key_uq",
+          "columns": [
+            "owner_id",
+            "batch_key"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "import_batches_owner_id_owners_id_fk": {
+          "name": "import_batches_owner_id_owners_id_fk",
+          "tableFrom": "import_batches",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "import_batches_status_check": {
+          "name": "import_batches_status_check",
+          "value": "\"import_batches\".\"status\" in ('running', 'completed', 'failed')"
+        },
+        "import_batches_processed_count_check": {
+          "name": "import_batches_processed_count_check",
+          "value": "\"import_batches\".\"processed_count\" >= 0"
+        }
+      }
+    },
+    "import_checkpoints": {
+      "name": "import_checkpoints",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "historical_import_id": {
+          "name": "historical_import_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_fingerprint": {
+          "name": "source_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "committed_byte_offset": {
+          "name": "committed_byte_offset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "message_ordinal": {
+          "name": "message_ordinal",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "discovered_count": {
+          "name": "discovered_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "parsed_count": {
+          "name": "parsed_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "skipped_count": {
+          "name": "skipped_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "duplicate_count": {
+          "name": "duplicate_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "failed_count": {
+          "name": "failed_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "imported_count": {
+          "name": "imported_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "import_checkpoints_import_uq": {
+          "name": "import_checkpoints_import_uq",
+          "columns": [
+            "historical_import_id"
+          ],
+          "isUnique": true
+        },
+        "import_checkpoints_owner_idx": {
+          "name": "import_checkpoints_owner_idx",
+          "columns": [
+            "owner_id",
+            "historical_import_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "import_checkpoints_owner_id_owners_id_fk": {
+          "name": "import_checkpoints_owner_id_owners_id_fk",
+          "tableFrom": "import_checkpoints",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "import_checkpoints_historical_import_id_historical_imports_id_fk": {
+          "name": "import_checkpoints_historical_import_id_historical_imports_id_fk",
+          "tableFrom": "import_checkpoints",
+          "tableTo": "historical_imports",
+          "columnsFrom": [
+            "historical_import_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "import_checkpoints_values_check": {
+          "name": "import_checkpoints_values_check",
+          "value": "\"import_checkpoints\".\"committed_byte_offset\" >= 0 and \"import_checkpoints\".\"message_ordinal\" >= 0 and \"import_checkpoints\".\"discovered_count\" >= 0 and \"import_checkpoints\".\"parsed_count\" >= 0 and \"import_checkpoints\".\"skipped_count\" >= 0 and \"import_checkpoints\".\"duplicate_count\" >= 0 and \"import_checkpoints\".\"failed_count\" >= 0 and \"import_checkpoints\".\"imported_count\" >= 0"
+        }
+      }
+    },
+    "import_errors": {
+      "name": "import_errors",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "historical_import_id": {
+          "name": "historical_import_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_message_id": {
+          "name": "source_message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "stage": {
+          "name": "stage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recoverable": {
+          "name": "recoverable",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "message_ordinal": {
+          "name": "message_ordinal",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "import_errors_owner_import_idx": {
+          "name": "import_errors_owner_import_idx",
+          "columns": [
+            "owner_id",
+            "historical_import_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "import_errors_owner_id_owners_id_fk": {
+          "name": "import_errors_owner_id_owners_id_fk",
+          "tableFrom": "import_errors",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "import_errors_historical_import_id_historical_imports_id_fk": {
+          "name": "import_errors_historical_import_id_historical_imports_id_fk",
+          "tableFrom": "import_errors",
+          "tableTo": "historical_imports",
+          "columnsFrom": [
+            "historical_import_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "import_errors_source_message_id_import_source_messages_id_fk": {
+          "name": "import_errors_source_message_id_import_source_messages_id_fk",
+          "tableFrom": "import_errors",
+          "tableTo": "import_source_messages",
+          "columnsFrom": [
+            "source_message_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "import_errors_ordinal_check": {
+          "name": "import_errors_ordinal_check",
+          "value": "\"import_errors\".\"message_ordinal\" is null or \"import_errors\".\"message_ordinal\" > 0"
+        }
+      }
+    },
+    "import_source_messages": {
+      "name": "import_source_messages",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "historical_import_id": {
+          "name": "historical_import_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "message_ordinal": {
+          "name": "message_ordinal",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "byte_offset": {
+          "name": "byte_offset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "byte_length": {
+          "name": "byte_length",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "raw_sha256": {
+          "name": "raw_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "canonical_sha256": {
+          "name": "canonical_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "normalized_message_id": {
+          "name": "normalized_message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "parse_status": {
+          "name": "parse_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "warning_codes_json": {
+          "name": "warning_codes_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
+        },
+        "error_code": {
+          "name": "error_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "import_source_messages_import_ordinal_uq": {
+          "name": "import_source_messages_import_ordinal_uq",
+          "columns": [
+            "historical_import_id",
+            "message_ordinal"
+          ],
+          "isUnique": true
+        },
+        "import_source_messages_owner_raw_hash_idx": {
+          "name": "import_source_messages_owner_raw_hash_idx",
+          "columns": [
+            "owner_id",
+            "raw_sha256"
+          ],
+          "isUnique": false
+        },
+        "import_source_messages_owner_canonical_hash_idx": {
+          "name": "import_source_messages_owner_canonical_hash_idx",
+          "columns": [
+            "owner_id",
+            "canonical_sha256"
+          ],
+          "isUnique": false
+        },
+        "import_source_messages_owner_message_id_idx": {
+          "name": "import_source_messages_owner_message_id_idx",
+          "columns": [
+            "owner_id",
+            "normalized_message_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "import_source_messages_owner_id_owners_id_fk": {
+          "name": "import_source_messages_owner_id_owners_id_fk",
+          "tableFrom": "import_source_messages",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "import_source_messages_historical_import_id_historical_imports_id_fk": {
+          "name": "import_source_messages_historical_import_id_historical_imports_id_fk",
+          "tableFrom": "import_source_messages",
+          "tableTo": "historical_imports",
+          "columnsFrom": [
+            "historical_import_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "import_source_messages_status_check": {
+          "name": "import_source_messages_status_check",
+          "value": "\"import_source_messages\".\"parse_status\" in ('imported', 'conflict', 'failed', 'skipped')"
+        },
+        "import_source_messages_offsets_check": {
+          "name": "import_source_messages_offsets_check",
+          "value": "\"import_source_messages\".\"message_ordinal\" > 0 and \"import_source_messages\".\"byte_offset\" >= 0 and \"import_source_messages\".\"byte_length\" >= 0"
+        }
+      }
+    },
+    "normalized_messages": {
+      "name": "normalized_messages",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_message_id": {
+          "name": "source_message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sent_at": {
+          "name": "sent_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "subject": {
+          "name": "subject",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sender_json": {
+          "name": "sender_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recipients_json": {
+          "name": "recipients_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reply_to_json": {
+          "name": "reply_to_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "normalized_message_id": {
+          "name": "normalized_message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "references_json": {
+          "name": "references_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "safe_text": {
+          "name": "safe_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "text_truncated": {
+          "name": "text_truncated",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "warning_codes_json": {
+          "name": "warning_codes_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "normalized_messages_source_uq": {
+          "name": "normalized_messages_source_uq",
+          "columns": [
+            "source_message_id"
+          ],
+          "isUnique": true
+        },
+        "normalized_messages_owner_date_idx": {
+          "name": "normalized_messages_owner_date_idx",
+          "columns": [
+            "owner_id",
+            "sent_at"
+          ],
+          "isUnique": false
+        },
+        "normalized_messages_owner_message_id_idx": {
+          "name": "normalized_messages_owner_message_id_idx",
+          "columns": [
+            "owner_id",
+            "normalized_message_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "normalized_messages_owner_id_owners_id_fk": {
+          "name": "normalized_messages_owner_id_owners_id_fk",
+          "tableFrom": "normalized_messages",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "normalized_messages_source_message_id_import_source_messages_id_fk": {
+          "name": "normalized_messages_source_message_id_import_source_messages_id_fk",
+          "tableFrom": "normalized_messages",
+          "tableTo": "import_source_messages",
+          "columnsFrom": [
+            "source_message_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "opportunities": {
+      "name": "opportunities",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recruiter_id": {
+          "name": "recruiter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "staffing_organization_id": {
+          "name": "staffing_organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "end_client_organization_id": {
+          "name": "end_client_organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_key": {
+          "name": "source_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "introduced_at": {
+          "name": "introduced_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "outcome_state": {
+          "name": "outcome_state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'unknown'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "opportunities_owner_source_key_uq": {
+          "name": "opportunities_owner_source_key_uq",
+          "columns": [
+            "owner_id",
+            "source_key"
+          ],
+          "isUnique": true
+        },
+        "opportunities_owner_recruiter_date_idx": {
+          "name": "opportunities_owner_recruiter_date_idx",
+          "columns": [
+            "owner_id",
+            "recruiter_id",
+            "introduced_at"
+          ],
+          "isUnique": false
+        },
+        "opportunities_owner_date_idx": {
+          "name": "opportunities_owner_date_idx",
+          "columns": [
+            "owner_id",
+            "introduced_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "opportunities_owner_id_owners_id_fk": {
+          "name": "opportunities_owner_id_owners_id_fk",
+          "tableFrom": "opportunities",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "opportunities_recruiter_id_recruiters_id_fk": {
+          "name": "opportunities_recruiter_id_recruiters_id_fk",
+          "tableFrom": "opportunities",
+          "tableTo": "recruiters",
+          "columnsFrom": [
+            "recruiter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "opportunities_staffing_organization_id_organizations_id_fk": {
+          "name": "opportunities_staffing_organization_id_organizations_id_fk",
+          "tableFrom": "opportunities",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "staffing_organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "opportunities_end_client_organization_id_organizations_id_fk": {
+          "name": "opportunities_end_client_organization_id_organizations_id_fk",
+          "tableFrom": "opportunities",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "end_client_organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "opportunities_outcome_check": {
+          "name": "opportunities_outcome_check",
+          "value": "\"opportunities\".\"outcome_state\" in ('unknown', 'rejected', 'offer', 'candidate_withdrew', 'closed_without_outcome')"
+        }
+      }
+    },
+    "organizations": {
+      "name": "organizations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "normalized_name": {
+          "name": "normalized_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "organizations_owner_name_idx": {
+          "name": "organizations_owner_name_idx",
+          "columns": [
+            "owner_id",
+            "normalized_name"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "organizations_owner_id_owners_id_fk": {
+          "name": "organizations_owner_id_owners_id_fk",
+          "tableFrom": "organizations",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "owner_email_identities": {
+      "name": "owner_email_identities",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "normalized_email": {
+          "name": "normalized_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "display_email": {
+          "name": "display_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "confirmed_at": {
+          "name": "confirmed_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "owner_email_identities_owner_email_uq": {
+          "name": "owner_email_identities_owner_email_uq",
+          "columns": [
+            "owner_id",
+            "normalized_email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "owner_email_identities_owner_id_owners_id_fk": {
+          "name": "owner_email_identities_owner_id_owners_id_fk",
+          "tableFrom": "owner_email_identities",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "owners": {
+      "name": "owners",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "recruiter_affiliations": {
+      "name": "recruiter_affiliations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recruiter_id": {
+          "name": "recruiter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "valid_from": {
+          "name": "valid_from",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "valid_to": {
+          "name": "valid_to",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "recruiter_affiliations_owner_recruiter_org_from_uq": {
+          "name": "recruiter_affiliations_owner_recruiter_org_from_uq",
+          "columns": [
+            "owner_id",
+            "recruiter_id",
+            "organization_id",
+            "valid_from"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "recruiter_affiliations_owner_id_owners_id_fk": {
+          "name": "recruiter_affiliations_owner_id_owners_id_fk",
+          "tableFrom": "recruiter_affiliations",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "recruiter_affiliations_recruiter_id_recruiters_id_fk": {
+          "name": "recruiter_affiliations_recruiter_id_recruiters_id_fk",
+          "tableFrom": "recruiter_affiliations",
+          "tableTo": "recruiters",
+          "columnsFrom": [
+            "recruiter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "recruiter_affiliations_organization_id_organizations_id_fk": {
+          "name": "recruiter_affiliations_organization_id_organizations_id_fk",
+          "tableFrom": "recruiter_affiliations",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "recruiter_affiliations_valid_range": {
+          "name": "recruiter_affiliations_valid_range",
+          "value": "\"recruiter_affiliations\".\"valid_to\" is null or \"recruiter_affiliations\".\"valid_to\" >= \"recruiter_affiliations\".\"valid_from\""
+        }
+      }
+    },
+    "recruiter_deletions": {
+      "name": "recruiter_deletions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recruiter_id": {
+          "name": "recruiter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "canonical_name_hash": {
+          "name": "canonical_name_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "recruiter_deletions_owner_idx": {
+          "name": "recruiter_deletions_owner_idx",
+          "columns": [
+            "owner_id",
+            "deleted_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "recruiter_deletions_owner_id_owners_id_fk": {
+          "name": "recruiter_deletions_owner_id_owners_id_fk",
+          "tableFrom": "recruiter_deletions",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "recruiter_deletions_scope_check": {
+          "name": "recruiter_deletions_scope_check",
+          "value": "\"recruiter_deletions\".\"scope\" = 'recruiter_derived_data'"
+        }
+      }
+    },
+    "recruiter_identities": {
+      "name": "recruiter_identities",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recruiter_id": {
+          "name": "recruiter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "normalized_email": {
+          "name": "normalized_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "display_email": {
+          "name": "display_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "valid_from": {
+          "name": "valid_from",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "valid_to": {
+          "name": "valid_to",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "recruiter_identities_owner_email_uq": {
+          "name": "recruiter_identities_owner_email_uq",
+          "columns": [
+            "owner_id",
+            "normalized_email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "recruiter_identities_owner_id_owners_id_fk": {
+          "name": "recruiter_identities_owner_id_owners_id_fk",
+          "tableFrom": "recruiter_identities",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "recruiter_identities_recruiter_id_recruiters_id_fk": {
+          "name": "recruiter_identities_recruiter_id_recruiters_id_fk",
+          "tableFrom": "recruiter_identities",
+          "tableTo": "recruiters",
+          "columnsFrom": [
+            "recruiter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "recruiter_identities_valid_range": {
+          "name": "recruiter_identities_valid_range",
+          "value": "\"recruiter_identities\".\"valid_to\" is null or \"recruiter_identities\".\"valid_to\" >= \"recruiter_identities\".\"valid_from\""
+        }
+      }
+    },
+    "recruiter_relationship_statuses": {
+      "name": "recruiter_relationship_statuses",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recruiter_id": {
+          "name": "recruiter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "excluded_at": {
+          "name": "excluded_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "recruiter_relationship_statuses_recruiter_uq": {
+          "name": "recruiter_relationship_statuses_recruiter_uq",
+          "columns": [
+            "recruiter_id"
+          ],
+          "isUnique": true
+        },
+        "recruiter_relationship_statuses_owner_idx": {
+          "name": "recruiter_relationship_statuses_owner_idx",
+          "columns": [
+            "owner_id",
+            "status"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "recruiter_relationship_statuses_owner_id_owners_id_fk": {
+          "name": "recruiter_relationship_statuses_owner_id_owners_id_fk",
+          "tableFrom": "recruiter_relationship_statuses",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "recruiter_relationship_statuses_recruiter_id_recruiters_id_fk": {
+          "name": "recruiter_relationship_statuses_recruiter_id_recruiters_id_fk",
+          "tableFrom": "recruiter_relationship_statuses",
+          "tableTo": "recruiters",
+          "columnsFrom": [
+            "recruiter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "recruiter_relationship_statuses_status_check": {
+          "name": "recruiter_relationship_statuses_status_check",
+          "value": "\"recruiter_relationship_statuses\".\"status\" in ('active', 'dormant', 'do_not_contact') or \"recruiter_relationship_statuses\".\"status\" is null"
+        },
+        "recruiter_relationship_statuses_timing_check": {
+          "name": "recruiter_relationship_statuses_timing_check",
+          "value": "\"recruiter_relationship_statuses\".\"excluded_at\" is null or \"recruiter_relationship_statuses\".\"updated_at\" >= \"recruiter_relationship_statuses\".\"excluded_at\""
+        }
+      }
+    },
+    "recruiters": {
+      "name": "recruiters",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "canonical_name": {
+          "name": "canonical_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "recruiters_owner_name_idx": {
+          "name": "recruiters_owner_name_idx",
+          "columns": [
+            "owner_id",
+            "canonical_name"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "recruiters_owner_id_owners_id_fk": {
+          "name": "recruiters_owner_id_owners_id_fk",
+          "tableFrom": "recruiters",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "review_decisions": {
+      "name": "review_decisions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "assertion_id": {
+          "name": "assertion_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "revision": {
+          "name": "revision",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "decision": {
+          "name": "decision",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "corrected_value_json": {
+          "name": "corrected_value_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "review_decisions_owner_assertion_revision_uq": {
+          "name": "review_decisions_owner_assertion_revision_uq",
+          "columns": [
+            "owner_id",
+            "assertion_id",
+            "revision"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "review_decisions_owner_id_owners_id_fk": {
+          "name": "review_decisions_owner_id_owners_id_fk",
+          "tableFrom": "review_decisions",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "review_decisions_assertion_id_evidence_assertions_id_fk": {
+          "name": "review_decisions_assertion_id_evidence_assertions_id_fk",
+          "tableFrom": "review_decisions",
+          "tableTo": "evidence_assertions",
+          "columnsFrom": [
+            "assertion_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "review_decisions_decision_check": {
+          "name": "review_decisions_decision_check",
+          "value": "\"review_decisions\".\"decision\" in ('confirmed', 'rejected', 'corrected')"
+        },
+        "review_decisions_corrected_value_check": {
+          "name": "review_decisions_corrected_value_check",
+          "value": "(\"review_decisions\".\"decision\" = 'corrected' and \"review_decisions\".\"corrected_value_json\" is not null) or (\"review_decisions\".\"decision\" != 'corrected' and \"review_decisions\".\"corrected_value_json\" is null)"
+        }
+      }
+    },
+    "source_references": {
+      "name": "source_references",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_kind": {
+          "name": "source_kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_key": {
+          "name": "source_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "content_sha256": {
+          "name": "content_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "captured_at": {
+          "name": "captured_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "source_references_owner_kind_key_uq": {
+          "name": "source_references_owner_kind_key_uq",
+          "columns": [
+            "owner_id",
+            "source_kind",
+            "source_key"
+          ],
+          "isUnique": true
+        },
+        "source_references_owner_hash_key_uq": {
+          "name": "source_references_owner_hash_key_uq",
+          "columns": [
+            "owner_id",
+            "content_sha256",
+            "source_key"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "source_references_owner_id_owners_id_fk": {
+          "name": "source_references_owner_id_owners_id_fk",
+          "tableFrom": "source_references",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "submissions": {
+      "name": "submissions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "opportunity_id": {
+          "name": "opportunity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recruiter_id": {
+          "name": "recruiter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "submitted_at": {
+          "name": "submitted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "submissions_owner_opportunity_uq": {
+          "name": "submissions_owner_opportunity_uq",
+          "columns": [
+            "owner_id",
+            "opportunity_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "submissions_owner_id_owners_id_fk": {
+          "name": "submissions_owner_id_owners_id_fk",
+          "tableFrom": "submissions",
+          "tableTo": "owners",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "submissions_opportunity_id_opportunities_id_fk": {
+          "name": "submissions_opportunity_id_opportunities_id_fk",
+          "tableFrom": "submissions",
+          "tableTo": "opportunities",
+          "columnsFrom": [
+            "opportunity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "submissions_recruiter_id_recruiters_id_fk": {
+          "name": "submissions_recruiter_id_recruiters_id_fk",
+          "tableFrom": "submissions",
+          "tableTo": "recruiters",
+          "columnsFrom": [
+            "recruiter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

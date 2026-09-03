@@ -128,7 +128,88 @@ export const opportunities = sqliteTable(
       table.introducedAt,
     ),
     index("opportunities_owner_date_idx").on(table.ownerId, table.introducedAt),
-    check("opportunities_outcome_check", sql`${table.outcomeState} = 'unknown'`),
+    check(
+      "opportunities_outcome_check",
+      sql`${table.outcomeState} in ('unknown', 'rejected', 'offer', 'candidate_withdrew', 'closed_without_outcome')`,
+    ),
+  ],
+);
+
+export const recruiterRelationshipStatuses = sqliteTable(
+  "recruiter_relationship_statuses",
+  {
+    id: text().primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => owners.id, { onDelete: "restrict" }),
+    recruiterId: text("recruiter_id")
+      .notNull()
+      .references(() => recruiters.id, { onDelete: "cascade" }),
+    status: text("status"),
+    excludedAt: text("excluded_at"),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [
+    uniqueIndex("recruiter_relationship_statuses_recruiter_uq").on(table.recruiterId),
+    index("recruiter_relationship_statuses_owner_idx").on(table.ownerId, table.status),
+    check(
+      "recruiter_relationship_statuses_status_check",
+      sql`${table.status} in ('active', 'dormant', 'do_not_contact') or ${table.status} is null`,
+    ),
+    check(
+      "recruiter_relationship_statuses_timing_check",
+      sql`${table.excludedAt} is null or ${table.updatedAt} >= ${table.excludedAt}`,
+    ),
+  ],
+);
+
+export const identityExclusions = sqliteTable(
+  "identity_exclusions",
+  {
+    id: text().primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => owners.id, { onDelete: "restrict" }),
+    identityId: text("identity_id").references(() => recruiterIdentities.id, {
+      onDelete: "cascade",
+    }),
+    domain: text("domain"),
+    reason: text("reason"),
+    excludedAt: text("excluded_at").notNull(),
+  },
+  (table) => [
+    uniqueIndex("identity_exclusions_identity_uq")
+      .on(table.ownerId, table.identityId)
+      .where(sql`${table.identityId} is not null`),
+    uniqueIndex("identity_exclusions_domain_uq")
+      .on(table.ownerId, table.domain)
+      .where(sql`${table.domain} is not null`),
+    check(
+      "identity_exclusions_target_check",
+      sql`(${table.identityId} is null and ${table.domain} is not null) or (${table.identityId} is not null and ${table.domain} is null)`,
+    ),
+    check(
+      "identity_exclusions_reason_check",
+      sql`${table.reason} is null or length(${table.reason}) <= 280`,
+    ),
+  ],
+);
+
+export const recruiterDeletions = sqliteTable(
+  "recruiter_deletions",
+  {
+    id: text().primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => owners.id, { onDelete: "restrict" }),
+    recruiterId: text("recruiter_id").notNull(),
+    canonicalNameHash: text("canonical_name_hash").notNull(),
+    scope: text("scope").notNull(),
+    deletedAt: text("deleted_at").notNull(),
+  },
+  (table) => [
+    index("recruiter_deletions_owner_idx").on(table.ownerId, table.deletedAt),
+    check("recruiter_deletions_scope_check", sql`${table.scope} = 'recruiter_derived_data'`),
   ],
 );
 
