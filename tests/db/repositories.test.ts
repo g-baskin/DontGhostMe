@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -17,6 +17,7 @@ let directory: string;
 let database: AppDatabase;
 
 beforeEach(() => {
+  mkdirSync(join(process.cwd(), ".local"), { recursive: true });
   directory = mkdtempSync(join(process.cwd(), ".local/dontghostme-repository-"));
   database = createDatabaseConnection(join(directory, "test.sqlite"));
   migrate(database.db, { migrationsFolder: "drizzle" });
@@ -91,6 +92,12 @@ describe("SQLite repository", () => {
     expect(exported.sourceReferences).toHaveLength(9);
     expect(exported.evidence).toHaveLength(5);
     expect(exported.importBatches).toHaveLength(1);
+    expect(exported.historicalImports).toEqual([]);
+    expect(exported.importCheckpoints).toEqual([]);
+    expect(exported.importSourceMessages).toEqual([]);
+    expect(exported.normalizedMessages).toEqual([]);
+    expect(exported.attachmentInventory).toEqual([]);
+    expect(exported.importErrors).toEqual([]);
     expect(JSON.stringify(exported)).not.toContain(directory);
   });
 });

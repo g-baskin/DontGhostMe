@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -8,6 +9,7 @@ const destinations = [
   ["/", "Home"],
   ["/recruiters", "Recruiters"],
   ["/opportunities", "Opportunities"],
+  ["/imports", "Imports"],
   ["/review-queue", "Review Queue"],
   ["/data-privacy", "Data & Privacy"],
 ] as const;
@@ -31,7 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 const current = href === "/" ? pathname === href : pathname.startsWith(href);
                 return (
                   <li key={href}>
-                    <Link href={href} aria-current={current ? "page" : undefined}>
+                    <Link href={href as Route} aria-current={current ? "page" : undefined}>
                       {label}
                     </Link>
                   </li>

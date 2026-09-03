@@ -8,7 +8,7 @@ Recruiters appear, disappear, follow up, submit candidates without clear status,
 
 ## Status
 
-M0 is implemented and verified as a local, synthetic vertical slice. M1 safe historical import is the next planning milestone; it is not implemented.
+M1 safe historical import and M2 local recruiter/opportunity discovery are implemented with synthetic fixtures. M2 requires confirmed candidate-owned email addresses, produces explainable proposals, and promotes only reviewed facts.
 
 ## Core boundaries
 
@@ -31,7 +31,7 @@ Coding agents and contributors should read these documents in order:
 
 ## Current development target
 
-The completed M0 foundation provides local SQLite persistence, domain contracts, tests, and an accessible application shell populated only with synthetic recruiter and opportunity data. M1 planning will add bounded, resumable import of synthetic Google Takeout/MBOX data. Live Gmail, LinkedIn, AI, enrichment, verification, analytics, and outbound communication remain explicitly excluded.
+The M1 foundation adds bounded local MBOX staging, preview, worker-isolated MIME parsing, inert text normalization, resumable checkpoints, deduplication, redacted errors, import history, and cleanup. M2 classifies those normalized messages with versioned local rules after the candidate confirms their mailbox addresses. Results remain proposals until reviewed; identity links, company changes, grouping, and submissions always require confirmation. Live Gmail, LinkedIn, AI, enrichment, verification, analytics, and outbound communication remain explicitly excluded.
 
 ## License
 
@@ -56,7 +56,7 @@ bun run db:seed
 bun run dev
 ```
 
-Open `http://127.0.0.1:3000`. Re-running `db:seed` safely replays the same nine-message fixture without duplicates.
+Open `http://127.0.0.1:3000`. Re-running `db:seed` safely replays the same nine-message fixture without duplicates. Use **Imports** to preview and process an extracted local `.mbox`; this never changes Gmail.
 
 ### Verification and database operations
 

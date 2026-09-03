@@ -8,7 +8,8 @@
     "node": ">=24.20.0 <27"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname 127.0.0.1",
+    "start": "next start --hostname 127.0.0.1",
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "typecheck": "tsc --noEmit",
@@ -19,12 +20,15 @@
     "db:migrate": "node --import tsx scripts/db-migrate.ts",
     "db:seed": "node --import tsx scripts/db-seed.ts",
     "db:backup": "node --import tsx scripts/db-backup.ts",
+    "db:verify": "node --import tsx scripts/db-verify.ts",
     "build": "next build"
   },
   "dependencies": {
     "better-sqlite3": "13.0.3",
     "drizzle-orm": "0.45.2",
+    "html-to-text": "10.0.1",
     "next": "16.3.4",
+    "postal-mime": "3.0.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "0.0.1"

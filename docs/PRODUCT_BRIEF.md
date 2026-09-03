@@ -1,6 +1,6 @@
 # DontGhostMe Product Brief
 
-**Status:** M0 implemented; M1 safe historical import planning next
+**Status:** M1 import and M2 local discovery implemented; M3 planning next
 **Last updated:** 2026-09-03
 
 ## One-sentence concept

@@ -2,7 +2,7 @@
 
 This roadmap sequences learning and risk reduction. A milestone is not automatically approved merely because it appears here. Complete planning and obtain user approval before implementing a milestone that introduces external services, sensitive data, or irreversible architecture.
 
-**Current status (2026-09-03):** M0 is implemented and verified. M1 safe historical import is the next planning milestone and is not implemented.
+**Current status (2026-09-03):** M0, M1, and M2 are implemented and locally verified. M1 carries the user's accepted soft runtime-matrix follow-up. M3 relationship views and analytics is the next planning milestone.
 
 ## M0 — Product scaffold ✅
 
@@ -39,7 +39,7 @@ Exit criteria:
 - The architecture does not require Gmail, LinkedIn, an LLM, a hosted service, or a Bun-only application API.
 - Domain services do not depend directly on Drizzle/SQLite, preserving an intentional future PostgreSQL migration path.
 
-## M1 — Safe historical import
+## M1 — Safe historical import ✅
 
 **Goal:** Import synthetic Google Takeout/MBOX data safely and idempotently.
 
@@ -58,7 +58,7 @@ Exit criteria:
 - Malformed or malicious fixtures fail safely without leaking content to logs.
 - No real mailbox archive is required for automated testing.
 
-## M2 — Recruiter and opportunity discovery
+## M2 — Recruiter and opportunity discovery ✅
 
 **Goal:** Turn normalized messages into correctable recruiter, identity, organization, opportunity, and event candidates.
 

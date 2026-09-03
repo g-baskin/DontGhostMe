@@ -1,4 +1,4 @@
-# M0 design specification
+# M1–M2 design specification
 
 ## Design read
 
@@ -30,6 +30,12 @@ Royal purple frames the product; gold, crimson, and acidic green add restrained 
 - Pending actions disable both buttons and announce progress.
 - Success is announced; revision conflicts preserve input and invite a reload/retry.
 - Rejection removes the fact from accepted views, never its assertion or source.
+- Imports follow one visible sequence: select, upload, preview, confirm, process, complete.
+- Native file input, progress elements, live status, explicit pause/resume, and disclosure-based deletion remain keyboard-operable.
+- Import history exposes counts and redacted states, never message content or local paths.
+- Classification starts disabled until the candidate confirms at least one owned mailbox address.
+- Proposal cards show state, confidence text and meter, signal explanations, bounded excerpts, and corrections.
+- Identity, grouping, and submission decisions require explicit confirmation; confidence never replaces review.
 
 ## Responsive behavior
 
@@ -37,4 +43,4 @@ At 320px, navigation wraps, tables become stacked records, controls remain at le
 
 ## Accessibility verification
 
-Verify all six routes, navigation, evidence disclosure, export, and review decisions at desktop and 320px. Required evidence includes keyboard traversal, visible focus, 200% text, reduced motion, forced colors, automated axe checks, contrast inspection, and representative VoiceOver/Safari use. Automation is not a conformance claim.
+Verify all routes, navigation, evidence disclosure, export, review decisions, imports, and classification at desktop and 320px. Required evidence includes keyboard traversal, visible focus, 200% text, reduced motion, forced colors, automated axe checks, contrast inspection, and representative VoiceOver/Safari use. Automation is not a conformance claim.

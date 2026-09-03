@@ -36,6 +36,17 @@ const exportTableNames = [
   "evidence_assertions",
   "review_decisions",
   "import_batches",
+  "historical_imports",
+  "import_checkpoints",
+  "import_source_messages",
+  "normalized_messages",
+  "attachment_inventory",
+  "import_errors",
+  "owner_email_identities",
+  "classification_runs",
+  "classification_proposals",
+  "classification_evidence",
+  "classification_decisions",
 ] as const;
 
 type ExportTableName = (typeof exportTableNames)[number];
@@ -391,6 +402,17 @@ export function createRepository(database: AppDatabase): AppRepository {
         }),
         reviewHistory: scoped("review_decisions"),
         importBatches: scoped("import_batches"),
+        historicalImports: scoped("historical_imports"),
+        importCheckpoints: scoped("import_checkpoints"),
+        importSourceMessages: scoped("import_source_messages"),
+        normalizedMessages: scoped("normalized_messages"),
+        attachmentInventory: scoped("attachment_inventory"),
+        importErrors: scoped("import_errors"),
+        ownerEmailIdentities: scoped("owner_email_identities"),
+        classificationRuns: scoped("classification_runs"),
+        classificationProposals: scoped("classification_proposals"),
+        classificationEvidence: scoped("classification_evidence"),
+        classificationDecisions: scoped("classification_decisions"),
       } satisfies PortableExport;
     },
   };

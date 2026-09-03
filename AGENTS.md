@@ -23,4 +23,4 @@ Then read:
 
 ## Current instruction
 
-M0 is implemented as a local, synthetic vertical slice using Bun + Biome + strict TypeScript + Next.js + SQLite/Drizzle. The next milestone is planning M1 safe historical import; do not implement M1 or race ahead into live Gmail, LinkedIn, AI, analytics, verification, or outbound integrations without explicit approval. Keep application persistence Node-compatible, and defer PostgreSQL until hosted multi-user/multi-writer operation.
+M1 safe historical import and M2 deterministic recruiter/opportunity discovery are implemented on the local M0 foundation. The next milestone is planning M3 relationship views and analytics; do not implement M3 or race ahead into live Gmail, LinkedIn, external AI, analytics/telemetry, verification, or outbound integrations without explicit approval. Keep application persistence Node-compatible, and defer PostgreSQL until hosted multi-user/multi-writer operation.

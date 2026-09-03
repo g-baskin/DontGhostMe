@@ -394,6 +394,72 @@
     color: var(--crimson);
   }
 
+  input,
+  select,
+  textarea {
+    max-inline-size: 100%;
+    min-block-size: 2.75rem;
+    border: 2px solid var(--ink);
+    padding: var(--space-2);
+    color: var(--ink);
+    background: var(--paper);
+    font: inherit;
+  }
+
+  textarea {
+    inline-size: min(100%, 42rem);
+  }
+
+  .proposal-value {
+    max-inline-size: 100%;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .import-controls {
+    display: grid;
+    gap: var(--space-2);
+    align-items: start;
+    max-inline-size: 38rem;
+  }
+
+  .import-controls input[type="file"] {
+    min-block-size: 2.75rem;
+    border: 2px solid var(--ink);
+    padding: var(--space-2);
+    color: var(--ink);
+    background: var(--paper);
+  }
+
+  progress {
+    display: block;
+    inline-size: min(100%, 32rem);
+    block-size: 1.25rem;
+    margin-block-start: var(--space-1);
+    accent-color: var(--royal);
+  }
+
+  .import-record dl {
+    grid-template-columns: repeat(3, minmax(6rem, 1fr));
+  }
+
+  .import-record dl > div {
+    border-inline-start: 3px solid var(--gold);
+    padding-inline-start: var(--space-2);
+  }
+
+  .import-record details {
+    border-block-start: 1px solid var(--ink);
+    padding-block-start: var(--space-2);
+  }
+
+  .import-record summary {
+    min-block-size: 2.75rem;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
   .site-footer {
     border-block-start: 2px solid var(--ink);
     padding-block: var(--space-6);
@@ -443,7 +509,8 @@
       padding-inline-start: var(--space-3);
     }
 
-    .record dl {
+    .record dl,
+    .import-record dl {
       grid-template-columns: 1fr;
     }
 

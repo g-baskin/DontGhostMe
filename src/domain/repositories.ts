@@ -47,6 +47,17 @@ export interface PortableExport {
   evidence: unknown[];
   reviewHistory: unknown[];
   importBatches: unknown[];
+  historicalImports: unknown[];
+  importCheckpoints: unknown[];
+  importSourceMessages: unknown[];
+  normalizedMessages: unknown[];
+  attachmentInventory: unknown[];
+  importErrors: unknown[];
+  ownerEmailIdentities: unknown[];
+  classificationRuns: unknown[];
+  classificationProposals: unknown[];
+  classificationEvidence: unknown[];
+  classificationDecisions: unknown[];
 }
 
 export interface ReadRepository {

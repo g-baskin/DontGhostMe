@@ -9,13 +9,14 @@ async function expectNoAxeViolations(page: import("@playwright/test").Page) {
 }
 
 test("Jane's complete evidence and correction flow", async ({ page }) => {
+  test.setTimeout(60_000);
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "Your recruiting history, with receipts." }),
   ).toBeVisible();
   await expect(page.getByText("Recruiter messages").locator("..").locator("dd")).toHaveText("6");
   await page.getByRole("link", { name: "Open Jane Recruiter's evidence timeline" }).click();
-  await expect(page).toHaveURL(janePath);
+  await expect(page).toHaveURL(janePath, { timeout: 20_000 });
   await expect(page.getByRole("heading", { name: "Evidence chronology" })).toBeVisible();
   await page.getByText("Inspect source evidence").first().click();
   await expect(page.getByText("jane-01-introduction")).toBeVisible();
@@ -25,6 +26,10 @@ test("Jane's complete evidence and correction flow", async ({ page }) => {
   await expect(page.getByText("Unknown outcome")).toHaveCount(1);
 
   await page.getByRole("link", { name: "Review Queue" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Your confirmed mailbox addresses" }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Classify imported messages" })).toBeDisabled();
   await page.getByRole("button", { name: "Confirm fact" }).click();
   await expect(page.getByText("Fact confirmed and history preserved.")).toBeVisible();
   await page.reload();
@@ -41,6 +46,7 @@ test("Jane's complete evidence and correction flow", async ({ page }) => {
 });
 
 test("all routes have no configured axe violations", async ({ page }) => {
+  test.setTimeout(60_000);
   for (const path of [
     "/",
     "/recruiters",

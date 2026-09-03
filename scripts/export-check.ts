@@ -20,6 +20,15 @@ try {
   if (exported.sourceReferences.length !== 9) throw new Error("Expected nine source references");
   if (exported.evidence.length !== 5) throw new Error("Expected five evidence assertions");
   if (exported.importBatches.length !== 1) throw new Error("Expected one import batch");
+  for (const rows of [
+    exported.ownerEmailIdentities,
+    exported.classificationRuns,
+    exported.classificationProposals,
+    exported.classificationEvidence,
+    exported.classificationDecisions,
+  ]) {
+    if (!Array.isArray(rows)) throw new Error("Expected M2 export collection");
+  }
   if (serialized.includes(".sqlite")) throw new Error("Export contains a local database path");
   console.log(
     JSON.stringify({
@@ -32,6 +41,17 @@ try {
       evidence: exported.evidence.length,
       reviewHistory: exported.reviewHistory.length,
       importBatches: exported.importBatches.length,
+      historicalImports: exported.historicalImports.length,
+      importCheckpoints: exported.importCheckpoints.length,
+      importSourceMessages: exported.importSourceMessages.length,
+      normalizedMessages: exported.normalizedMessages.length,
+      attachmentInventory: exported.attachmentInventory.length,
+      importErrors: exported.importErrors.length,
+      ownerEmailIdentities: exported.ownerEmailIdentities.length,
+      classificationRuns: exported.classificationRuns.length,
+      classificationProposals: exported.classificationProposals.length,
+      classificationEvidence: exported.classificationEvidence.length,
+      classificationDecisions: exported.classificationDecisions.length,
       pathLeak: false,
     }),
   );

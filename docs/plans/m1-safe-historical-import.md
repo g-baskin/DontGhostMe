@@ -1,7 +1,7 @@
 # M1 plan — Safe historical import
 
-**Status:** Planning only; implementation requires explicit approval  
-**Prepared:** 2026-09-03  
+**Status:** Implemented and locally verified 2026-09-03; Node 24/26 CI matrix pending
+**Prepared:** 2026-09-03
 **Goal:** Import synthetic Google Takeout MBOX data safely, incrementally, and idempotently into the existing source-reference, normalized communication-event, and evidence pipeline.
 
 ## Scope and non-goals

@@ -107,6 +107,6 @@ The implementation includes checked-in forward-only migrations; verified SQLite 
 
 Keep SQLite through the local single-user milestones. PostgreSQL remains deferred until hosted multi-user operation requires tenant isolation, multiple application instances, independently writing workers, or writers on different hosts.
 
-M1 safe historical import is the next planning milestone and is not implemented. Imports must be parsed outside the database and persisted in short, resumable, idempotent batches. Do not add live Gmail, LinkedIn, AI, analytics, enrichment, email verification, telemetry, or outbound messaging without explicit approval.
+M1 safe historical import and M2 deterministic local discovery are implemented. M2 requires confirmed owner addresses, stores versioned explainable proposals, and promotes only reviewed facts while preserving provenance and decisions. M3 relationship views and analytics are the next planning milestone. Do not add live Gmail, LinkedIn, AI, analytics, enrichment, email verification, telemetry, or outbound messaging without explicit approval.
 
 <!-- gg:init:end -->

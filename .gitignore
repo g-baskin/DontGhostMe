@@ -17,6 +17,13 @@
 *.db-journal
 *.db-wal
 *.db-shm
+*.mbox
+!src/test/fixtures/*.mbox
+*.eml
+*.zip
+*.tar
+*.tgz
+*.gz
 
 # Dependencies and generated output
 node_modules/
