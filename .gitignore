@@ -26,6 +26,16 @@ coverage/
 .next/
 .turbo/
 .cache/
+test-results/
+playwright-report/
+blob-report/
+.scan-output/
+reports/scan-output/
+*.tsbuildinfo
+
+.local/
+backups/
+.gg/screenshots/
 
 # Logs and temporary files
 *.log

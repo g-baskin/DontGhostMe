@@ -1,0 +1,48 @@
+{
+  "name": "dontghostme",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.0",
+  "engines": {
+    "node": ">=24.20.0 <27"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:export": "node --import tsx scripts/export-check.ts",
+    "test:e2e": "playwright test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node --import tsx scripts/db-migrate.ts",
+    "db:seed": "node --import tsx scripts/db-seed.ts",
+    "db:backup": "node --import tsx scripts/db-backup.ts",
+    "build": "next build"
+  },
+  "dependencies": {
+    "better-sqlite3": "13.0.3",
+    "drizzle-orm": "0.45.2",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@biomejs/biome": "2.5.11",
+    "@playwright/test": "1.58.2",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@types/better-sqlite3": "9.6.0",
+    "@types/node": "24.10.13",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "drizzle-kit": "0.31.10",
+    "jsdom": "30.0.1",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vitest": "4.1.0"
+  }
+}

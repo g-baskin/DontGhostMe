@@ -4,25 +4,38 @@ This roadmap sequences learning and risk reduction. A milestone is not automatic
 
 ## M0 — Product scaffold
 
-**Goal:** Establish a high-quality local development foundation and demonstrate the intended experience with synthetic data.
+**Goal:** Establish a light, high-quality local foundation and prove the recruiter-history model with one complete synthetic vertical slice.
+
+Approved direction:
+
+- Bun package manager and command runner with a committed `bun.lock`; application code remains Node-compatible.
+- Current stable Next.js App Router, React, and strict TypeScript.
+- Biome for formatting, imports, and primary linting; no Prettier. Add targeted ESLint only after documenting a material rule gap and obtaining approval.
+- SQLite with Drizzle for the local single-user product. PostgreSQL is deferred until multi-user/multi-writer deployment requires it.
+- Vitest, React Testing Library, and Playwright; do not substitute `bun test` for the selected runners.
 
 Deliverables:
 
-- Proposed stack and short architecture decision record approved before implementation.
-- Reproducible install, development, lint, type-check, test, and build commands.
-- Clear application, domain, persistence, ingestion, and integration boundaries.
-- Initial domain contracts for recruiter, identity, organization affiliation, opportunity, communication, extracted event, source reference, confidence, and review state.
-- Application shell for Home, Recruiters, Recruiter Detail, Opportunities, Review Queue, and Data & Privacy.
-- Synthetic seed data demonstrating multiple jobs, repeated follow-up, an unknown outcome, multiple email addresses, and a recruiter company change.
-- Tests for the interpretation rules in `CLAUDE.md`.
-- No live external integrations.
+- Short architecture decision record for the exact versions, SQLite driver, runtime boundary, and future PostgreSQL trigger.
+- Reproducible `bun` commands for install, development, formatting/lint checks, type-checking, unit tests, end-to-end tests, and production build.
+- SQLite startup verification for foreign keys, WAL mode, busy timeout, durability policy, FTS5 availability when introduced, and a patched runtime version.
+- Clear application, domain, persistence, ingestion, and future integration boundaries.
+- Initial domain contracts for recruiter, recruiter identity, organization, affiliation history, opportunity, submission, conversation, communication event, extracted event, source reference, confidence, and review state.
+- Accessible application shell for Home, Recruiters, Recruiter Detail, Opportunities, Review Queue, and Data & Privacy.
+- Synthetic Jane Recruiter history spanning an old employer/address and a new employer/address, two separate opportunities, candidate replies, resume and right-to-represent requests, explicit submission evidence, recruiter follow-up, interview request, and unknown outcome.
+- Derived first/last contact, directional message counts, follow-up count, opportunity count, submission count, and unknown-outcome count.
+- At least one user correction workflow with preserved source evidence, confidence, and review state.
+- Unit tests for critical interpretation rules and one Playwright vertical-slice test.
+- No live external integrations or real personal data.
 
 Exit criteria:
 
-- A new contributor can run the project from documented commands.
-- Quality commands pass.
-- The UI can demonstrate the core recruiter-centered timeline using synthetic data.
-- The architecture does not require Gmail, LinkedIn, an LLM, or a hosted service to run.
+- A new contributor can run the project from documented Bun commands without a PostgreSQL server or hosted dependency.
+- All Biome, TypeScript, unit-test, end-to-end, and build gates pass.
+- The UI shows Jane as one person with multiple dated identities/affiliations and keeps the two opportunities separate.
+- Only explicit evidence or user confirmation marks a submission; unresolved history remains `unknown`.
+- The architecture does not require Gmail, LinkedIn, an LLM, a hosted service, or a Bun-only application API.
+- Domain services do not depend directly on Drizzle/SQLite, preserving an intentional future PostgreSQL migration path.
 
 ## M1 — Safe historical import
 

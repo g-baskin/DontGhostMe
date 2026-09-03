@@ -23,4 +23,4 @@ Then read:
 
 ## Current instruction
 
-The repository is at the pre-scaffold stage. The next coding session should inspect these documents, propose a small scaffold plan and stack, and keep the first implementation limited to local development, synthetic data, domain contracts, and an application shell. Do not race ahead into production integrations.
+The repository is at the pre-scaffold stage. The approved direction is Bun + Biome + strict TypeScript + Next.js + SQLite/Drizzle, with Node-compatible application code and PostgreSQL deferred until hosted multi-user/multi-writer operation. Run `.gg/commands/scaffold.md` (the `/scaffold` command) for the complete M0 planning procedure, synthetic vertical slice, database operating rules, exclusions, acceptance criteria, and approval gate. Do not race ahead into production integrations.
