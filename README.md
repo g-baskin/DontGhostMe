@@ -8,7 +8,7 @@ Recruiters appear, disappear, follow up, submit candidates without clear status,
 
 ## Status
 
-DontGhostMe is in discovery and pre-scaffold planning. The repository currently contains the product definition, research record, privacy boundaries, and phased roadmap that coding agents must follow before choosing a stack or generating the application.
+M0 is implemented and verified as a local, synthetic vertical slice. M1 safe historical import is the next planning milestone; it is not implemented.
 
 ## Core boundaries
 
@@ -29,9 +29,9 @@ Coding agents and contributors should read these documents in order:
 4. [`ROADMAP.md`](./ROADMAP.md) — phased implementation sequence and exit criteria.
 5. [`docs/research/product-landscape.md`](./docs/research/product-landscape.md) — researched products, APIs, policies, and integration options.
 
-## Initial development target
+## Current development target
 
-The first scaffold should establish a local development environment, domain contracts, tests, and an accessible application shell populated only with synthetic recruiter and opportunity data. Live Gmail, LinkedIn, AI, enrichment, verification, analytics, and outbound communication are explicitly outside the initial scaffold.
+The completed M0 foundation provides local SQLite persistence, domain contracts, tests, and an accessible application shell populated only with synthetic recruiter and opportunity data. M1 planning will add bounded, resumable import of synthetic Google Takeout/MBOX data. Live Gmail, LinkedIn, AI, enrichment, verification, analytics, and outbound communication remain explicitly excluded.
 
 ## License
 
@@ -56,7 +56,7 @@ bun run db:seed
 bun run dev
 ```
 
-Open `http://localhost:3000`. Re-running `db:seed` safely replays the same nine-message fixture without duplicates.
+Open `http://127.0.0.1:3000`. Re-running `db:seed` safely replays the same nine-message fixture without duplicates.
 
 ### Verification and database operations
 

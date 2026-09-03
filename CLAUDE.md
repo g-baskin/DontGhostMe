@@ -99,30 +99,14 @@ Initial discovery should use headers, participants, dates, subjects, labels, and
 - Keep secrets in environment variables and maintain a safe `.env.example` only after a stack is selected.
 - Use synthetic adversarial fixtures and test duplicate import, malformed MIME, conflicting identities, and uncertain classification.
 
-## Approved scaffold direction
+## Current implementation status
 
-The project remains pre-scaffold and has no production integration, but the initial toolchain and persistence direction are now set:
+M0 is implemented and verified as a local, synthetic vertical slice. The baseline uses Bun `1.4.0`, Biome, strict TypeScript, Next.js App Router, Vitest, Playwright, Drizzle, and `better-sqlite3`. Application code remains Node-compatible with Node `24.20.0` primary and `26.4.0` compatibility.
 
-- Use **Bun** as package manager and project command runner. Commit `bun.lock`, set the `packageManager` field, pin Bun in CI, use `bun install --frozen-lockfile`, and do not create a competing npm, pnpm, or Yarn lockfile.
-- Keep application code **Node-compatible**. Bun is the fast package/install/script layer; do not couple core code to `Bun.serve`, `bun:sqlite`, or another Bun-only API without an approved architecture decision.
-- Use the current stable **Next.js App Router**, React, and strict TypeScript.
-- Use **Biome** for formatting, import organization, and primary linting. Do not add Prettier.
-- Require `tsc --noEmit`. Begin without ESLint; if specialized Next.js, React Hooks, or React Compiler rules are materially missing, identify the exact gap and request approval for a small targeted ESLint backstop.
-- Use **Vitest** and React Testing Library for unit/component tests and **Playwright** for end-to-end tests. `bun test` is not a substitute for those test runners.
-- Use **SQLite** with Drizzle for the local single-user product through M4. Mailbox volume alone does not justify PostgreSQL; multiple independent writers, hosts, application instances, workers, and tenants do.
-- Evaluate `node:sqlite`, `better-sqlite3`, and local libSQL before selecting a driver. Prefer a standard driver behind repositories; do not select `bun:sqlite` without approval for Bun-runtime coupling.
-- Configure and verify SQLite foreign keys, WAL mode, a bounded busy timeout, and an explicit durability policy at startup.
-- Require a SQLite release containing the current WAL-reset corruption fix (3.51.3+ or an explicitly documented patched maintenance release) and assert the runtime version.
-- Parse imports outside the database and persist short, resumable, idempotent batches rather than one mailbox-wide transaction.
-- Use FTS5 only through reviewed migrations and verify that the selected SQLite runtime includes it.
-- Keep stable application-generated IDs, UTC timestamps, ownership fields, provenance hashes, repository boundaries, and a portable export format so a future PostgreSQL migration is controlled.
-- Drizzle does not make SQLite-to-PostgreSQL conversion automatic. PostgreSQL will require a separate schema, migrations, rebuilt search indexes, validation, and cutover plan.
-- Defer PostgreSQL until hosted multi-user operation requires tenant isolation, multiple application instances, independently writing workers, or writers on different hosts.
+The implementation includes checked-in forward-only migrations; verified SQLite startup settings; deterministic, idempotent synthetic seed data; repository boundaries; recruiter metrics; append-only review decisions; portable export; six UI routes; and database, unit, component, build, accessibility, responsive, and browser checks.
 
-The first vertical slice is an evidence-backed, user-correctable recruiter timeline built entirely from synthetic data. It must demonstrate one recruiter using old and new company identities across two opportunities, candidate replies, a resume request, right-to-represent, explicit submission evidence, a follow-up, an interview request, and an unresolved outcome.
+Keep SQLite through the local single-user milestones. PostgreSQL remains deferred until hosted multi-user operation requires tenant isolation, multiple application instances, independently writing workers, or writers on different hosts.
 
-The initial scaffold must provide reproducible install, development, check, type-check, test, end-to-end test, and build commands; establish domain and persistence boundaries; render the synthetic recruiter experience; and test the critical interpretation rules. It must not add live Gmail, LinkedIn, AI, analytics, enrichment, email verification, or outbound messaging.
-
-Run `.gg/commands/scaffold.md` as the project scaffold command. It contains the complete M0 procedure and approval gate.
+M1 safe historical import is the next planning milestone and is not implemented. Imports must be parsed outside the database and persisted in short, resumable, idempotent batches. Do not add live Gmail, LinkedIn, AI, analytics, enrichment, email verification, telemetry, or outbound messaging without explicit approval.
 
 <!-- gg:init:end -->

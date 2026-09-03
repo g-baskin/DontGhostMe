@@ -23,4 +23,4 @@ Then read:
 
 ## Current instruction
 
-The repository is at the pre-scaffold stage. The approved direction is Bun + Biome + strict TypeScript + Next.js + SQLite/Drizzle, with Node-compatible application code and PostgreSQL deferred until hosted multi-user/multi-writer operation. Run `.gg/commands/scaffold.md` (the `/scaffold` command) for the complete M0 planning procedure, synthetic vertical slice, database operating rules, exclusions, acceptance criteria, and approval gate. Do not race ahead into production integrations.
+M0 is implemented as a local, synthetic vertical slice using Bun + Biome + strict TypeScript + Next.js + SQLite/Drizzle. The next milestone is planning M1 safe historical import; do not implement M1 or race ahead into live Gmail, LinkedIn, AI, analytics, verification, or outbound integrations without explicit approval. Keep application persistence Node-compatible, and defer PostgreSQL until hosted multi-user/multi-writer operation.

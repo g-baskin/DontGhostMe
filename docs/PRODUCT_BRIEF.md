@@ -1,7 +1,7 @@
 # DontGhostMe Product Brief
 
-**Status:** Discovery / pre-scaffold
-**Last updated:** 2026-09-02
+**Status:** M0 implemented; M1 safe historical import planning next
+**Last updated:** 2026-09-03
 
 ## One-sentence concept
 

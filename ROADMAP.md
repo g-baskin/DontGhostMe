@@ -2,7 +2,9 @@
 
 This roadmap sequences learning and risk reduction. A milestone is not automatically approved merely because it appears here. Complete planning and obtain user approval before implementing a milestone that introduces external services, sensitive data, or irreversible architecture.
 
-## M0 — Product scaffold
+**Current status (2026-09-03):** M0 is implemented and verified. M1 safe historical import is the next planning milestone and is not implemented.
+
+## M0 — Product scaffold ✅
 
 **Goal:** Establish a light, high-quality local foundation and prove the recruiter-history model with one complete synthetic vertical slice.
 
